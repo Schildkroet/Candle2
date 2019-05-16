@@ -11,7 +11,7 @@ Supported functions:
 
 System requirements for running "Candle":
 -------------------
-* Windows/Linux x86
+* Windows/Linux x86_x64
 * CPU with SSE2 instruction set support
 * Graphics card with OpenGL 2.0 support
 * 160 MB free storage space
@@ -28,6 +28,6 @@ Downloads:
 * Linux: [candle_2.0.zip](tbd)
 
 
-"Candle 2" main window:
+Candle 2 GUI
 ![screenshot](/Screenshots/image1.png)
 
