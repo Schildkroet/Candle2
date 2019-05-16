@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>fonts/segoeui.ttf</file>
+        <file>fonts/tahoma.ttf</file>
+        <file>fonts/Ubuntu-R.ttf</file>
+    </qresource>
+</RCC>
