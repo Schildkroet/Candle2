@@ -24,7 +24,7 @@ Linux: QT 5.12.2 with GCC
 Downloads:
 ----------
 
-* Windows: [Candle_2.0.zip](tbd)
+* Windows: [Candle_2.0.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.0/Candle2.0.zip)
 * Linux: [candle_2.0.zip](tbd)
 
 
