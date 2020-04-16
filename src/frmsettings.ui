@@ -73,7 +73,7 @@ QGroupBox {
           <x>0</x>
           <y>0</y>
           <width>497</width>
-          <height>1769</height>
+          <height>1798</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -183,6 +183,13 @@ QGroupBox {
              <widget class="QCheckBox" name="chkUseM6">
               <property name="text">
                <string>Process M6 Tool Change (GRBL-Advanced)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chkEnableRotaryAxis">
+              <property name="text">
+               <string>Use rotary axis (A and B)</string>
               </property>
              </widget>
             </item>

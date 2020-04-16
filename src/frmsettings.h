@@ -122,6 +122,8 @@ public:
     void setAutoLine(bool value);
     bool UseM6();
     void setUseM6(bool value);
+    bool UseRotaryAxis();
+    void setUseRotaryAxis(bool value);
 
 protected:
     void showEvent(QShowEvent *se);

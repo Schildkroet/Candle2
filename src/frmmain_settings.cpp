@@ -33,6 +33,7 @@ void frmMain::loadSettings()
     m_settings->setIgnoreErrors(set.value("ignoreErrors", false).toBool());
     m_settings->setAutoLine(set.value("autoLine", true).toBool());
     m_settings->setUseM6(set.value("useM6", false).toBool());
+    m_settings->setUseRotaryAxis(set.value("useRotary", false).toBool());
     m_settings->setToolDiameter(set.value("toolDiameter", 3).toDouble());
     m_settings->setToolLength(set.value("toolLength", 15).toDouble());
     m_settings->setAntialiasing(set.value("antialiasing", true).toBool());
@@ -190,6 +191,7 @@ void frmMain::saveSettings()
     set.setValue("ignoreErrors", m_settings->ignoreErrors());
     set.setValue("autoLine", m_settings->autoLine());
     set.setValue("useM6", m_settings->UseM6());
+    set.setValue("useRotary", m_settings->UseRotaryAxis());
     set.setValue("toolDiameter", m_settings->toolDiameter());
     set.setValue("toolLength", m_settings->toolLength());
     set.setValue("antialiasing", m_settings->antialiasing());

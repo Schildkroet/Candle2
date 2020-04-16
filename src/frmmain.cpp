@@ -41,6 +41,7 @@
 
 
 static const int ReceiveTimerInterval_ms = 10;
+static const int SendTimerInterval_ms = 40;
 
 
 frmMain::frmMain(QWidget *parent) :
@@ -318,10 +319,15 @@ frmMain::frmMain(QWidget *parent) :
     ui->txtWPosX->setStyleSheet("* {background-color:rgb(255, 255, 255);}");
     ui->txtWPosY->setStyleSheet("* {background-color:rgb(255, 255, 255);}");
     ui->txtWPosZ->setStyleSheet("* {background-color:rgb(255, 255, 255);}");
+    ui->txtWPosA->setStyleSheet("* {background-color:rgb(255, 255, 255);}");
+    ui->txtWPosB->setStyleSheet("* {background-color:rgb(255, 255, 255);}");
 
     // Set green background for connect/send button
     ui->btnConnect->setPalette(QPalette(QColor(255, 140, 140)));
     ui->cmdFileSend->setPalette(QPalette(QColor(64, 255, 64)));
+
+    // Set button background red
+    ui->btnHandwheel->setPalette(QPalette(QColor(255, 140, 140)));
 
     // Set default protocol grbl 1.1
     m_Protocol = PROT_GRBL1_1;
@@ -329,18 +335,20 @@ frmMain::frmMain(QWidget *parent) :
     // Start timers
     m_timerSpindleUpdate.start(400);
     m_timerStateQuery.start(200);
-    m_timerSend.start(30);
+    m_timerSend.start(SendTimerInterval_ms);
 }
 
 void frmMain::UpdateComPorts()
 {
     // Clear combobox
     ui->comboInterface->clear();
+    ui->comboHandwheel->clear();
 
     // Add available ports to combobox
     foreach (QSerialPortInfo info ,QSerialPortInfo::availablePorts())
     {
         ui->comboInterface->insertItem(0, info.portName());
+        ui->comboHandwheel->insertItem(0, info.portName());
     }
     // Add Ethernet option
     ui->comboInterface->addItem("ETHERNET");
@@ -365,6 +373,12 @@ void frmMain::UpdateComPorts()
     {
         ui->comboBaud->setCurrentIndex(idx);
     }
+
+    m_serialHandWheel.setParity(QSerialPort::NoParity);
+    m_serialHandWheel.setDataBits(QSerialPort::Data8);
+    m_serialHandWheel.setFlowControl(QSerialPort::NoFlowControl);
+    m_serialHandWheel.setStopBits(QSerialPort::OneStop);
+    m_serialHandWheel.setBaudRate(230400);
 }
 
 frmMain::~frmMain()
@@ -387,9 +401,13 @@ frmMain::~frmMain()
             GrIP_Transmit(MSG_REALTIME_CMD, 0, &p);
         }
 
-        QThread::msleep(60);
+        QThread::msleep(100);
 
         SerialIf_Close();
+    }
+    if(m_serialHandWheel.isOpen())
+    {
+        m_serialHandWheel.close();
     }
 
     delete m_senderErrorBox;
@@ -527,8 +545,8 @@ void frmMain::updateControlsState()
     ui->tblHeightMap->setVisible(m_heightMapMode);
     ui->tblProgram->setVisible(!m_heightMapMode);
 
-    //ui->widgetHeightMap->setEnabled(!m_processingFile && m_programModel.rowCount() > 1);
-    ui->widgetHeightMap->setEnabled(false);
+    ui->widgetHeightMap->setEnabled(!m_processingFile && m_programModel.rowCount() > 1);
+    //ui->widgetHeightMap->setEnabled(false);
     ui->cmdHeightMapMode->setEnabled(!ui->txtHeightMap->text().isEmpty());
 
     ui->cmdFileSend->setText(m_heightMapMode ? tr("Probe") : tr("Send"));
@@ -680,6 +698,24 @@ void frmMain::onProcessData()
     default:
         break;
     }
+
+    if(m_serialHandWheel.isOpen() && m_serialHandWheel.canReadLine() && m_transferCompleted)
+    {
+        QString msg = m_serialHandWheel.readLine();
+        //qDebug() << "HW: " << msg;
+        if(msg.size() < 3)
+        {
+            // RT message
+            on_cmdStop_clicked();
+            return;
+        }
+        sendCommand(msg);
+    }
+    if(m_transferCompleted == false)
+    {
+        // Drop all data received while sending file
+        m_serialHandWheel.clear();
+    }
 }
 
 void frmMain::onSendSerial()
@@ -718,7 +754,7 @@ void frmMain::onSendSerial()
                 m_fileEndSent = true;
             }
 
-            if(m_settings->UseM6() && command.contains("M6") && command[0] != '(' && command[0] != ';')
+            if(m_settings->UseM6() && (command.contains("M6") || command.contains("M06")) && command[0] != '(' && command[0] != ';')
             {
                 qDebug() << "Tool change command";
                 m_toolChangeActive = true;
@@ -2112,5 +2148,34 @@ void frmMain::on_actionDisable_Stepper_triggered()
             Pdu_t p = {(uint8_t*)data.data(), (uint16_t)data.length()};
             GrIP_Transmit(MSG_REALTIME_CMD, 0, &p);
         }
+    }
+}
+
+void frmMain::on_btnHandwheel_clicked()
+{
+    if(!m_serialHandWheel.isOpen())
+    {
+        if(ui->comboHandwheel->currentText().size())
+        {
+            m_serialHandWheel.setPortName(ui->comboHandwheel->currentText());
+            m_serialHandWheel.open(QIODevice::ReadWrite);
+        }
+    }
+    else
+    {
+        m_serialHandWheel.close();
+    }
+
+    if(m_serialHandWheel.isOpen())
+    {
+        // Set button background green
+        ui->btnHandwheel->setPalette(QPalette(QColor(100, 255, 100)));
+        ui->comboHandwheel->setEnabled(false);
+    }
+    else
+    {
+        // Set button background red
+        ui->btnHandwheel->setPalette(QPalette(QColor(255, 140, 140)));
+        ui->comboHandwheel->setEnabled(true);
     }
 }

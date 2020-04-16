@@ -234,6 +234,8 @@ private slots:
 
     void on_actionDisable_Stepper_triggered();
 
+    void on_btnHandwheel_clicked();
+
 protected:
     void showEvent(QShowEvent *se);
     void hideEvent(QHideEvent *he);
@@ -444,6 +446,8 @@ private:
 
     // Name of setting file
     const QString settings_file = "/settings.ini";
+
+    QSerialPort m_serialHandWheel;
 };
 
 

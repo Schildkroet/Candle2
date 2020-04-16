@@ -34,7 +34,7 @@ void frmMain::ProcessGRBL1_1()
     {
         QString data = SerialIf_ReadLine().trimmed();
 
-        //qDebug() << data;
+        //qDebug() << "<" << data << ">";
 
         // Filter prereset responses
         if(m_reseting)
@@ -57,12 +57,28 @@ void frmMain::ProcessGRBL1_1()
             m_statusReceived = true;
 
             // Update machine coordinates
-            static QRegExp mpx("MPos:([^,]*),([^,]*),([^,^>^|]*)");
+            static QRegExp mpx;
+            if(!m_settings->UseRotaryAxis())
+            {
+                mpx.setPattern("MPos:([^,]*),([^,]*),([^,^>^|]*)");
+            }
+            else
+            {
+                mpx.setPattern("MPos:([^,]*),([^,]*),([^,]*),([^,]*),([^,^>^|]*)");
+            }
+
             if(mpx.indexIn(data) != -1)
             {
                 ui->txtMPosX->setText(mpx.cap(1));
                 ui->txtMPosY->setText(mpx.cap(2));
                 ui->txtMPosZ->setText(mpx.cap(3));
+            }
+            if(m_settings->UseRotaryAxis())
+            {
+                // Set A & B
+                //qDebug() << "A: " << mpx.cap(4);
+                ui->txtMPosA->setText(mpx.cap(4));
+                ui->txtMPosB->setText(mpx.cap(5));
             }
 
             // Status
@@ -152,6 +168,8 @@ void frmMain::ProcessGRBL1_1()
                 static double x = sNan;
                 static double y = sNan;
                 static double z = sNan;
+                static double a = sNan;
+                static double b = sNan;
 
                 if(m_aborting)
                 {
@@ -161,7 +179,7 @@ void frmMain::ProcessGRBL1_1()
                         if (!m_processingFile && m_resetCompleted)
                         {
                             m_aborting = false;
-                            restoreOffsets();
+                            //restoreOffsets();
                             restoreParserState();
                             return;
                         }
@@ -175,6 +193,8 @@ void frmMain::ProcessGRBL1_1()
                             x = sNan;
                             y = sNan;
                             z = sNan;
+                            a = sNan;
+                            b = sNan;
                             GrblReset();
                         }
                         else
@@ -182,6 +202,8 @@ void frmMain::ProcessGRBL1_1()
                             x = ui->txtMPosX->text().toDouble();
                             y = ui->txtMPosY->text().toDouble();
                             z = ui->txtMPosZ->text().toDouble();
+                            a = ui->txtMPosA->text().toDouble();
+                            b = ui->txtMPosB->text().toDouble();
                         }
                         break;
                     }
@@ -190,11 +212,28 @@ void frmMain::ProcessGRBL1_1()
 
             // Store work offset
             static QVector3D workOffset;
-            static QRegExp wpx("WCO:([^,]*),([^,]*),([^,^>^|]*)");
+            static double workOffsetAB[2] = {0.0};
+            static QRegExp wpx;
+
+            if(!m_settings->UseRotaryAxis())
+            {
+                wpx.setPattern("WCO:([^,]*),([^,]*),([^,^>^|]*)");
+            }
+            else
+            {
+                wpx.setPattern("WCO:([^,]*),([^,]*),([^,]*),([^,]*),([^,^>^|]*)");
+            }
 
             if(wpx.indexIn(data) != -1)
             {
                 workOffset = QVector3D(wpx.cap(1).toDouble(), wpx.cap(2).toDouble(), wpx.cap(3).toDouble());
+
+                // Store offsets for rotary axis
+                if(m_settings->UseRotaryAxis())
+                {
+                    workOffsetAB[0] = wpx.cap(4).toDouble();
+                    workOffsetAB[1] = wpx.cap(5).toDouble();
+                }
             }
 
             // Update work coordinates
@@ -202,6 +241,12 @@ void frmMain::ProcessGRBL1_1()
             ui->txtWPosX->display(QString::number(ui->txtMPosX->text().toDouble() - workOffset.x(), 'f', prec));
             ui->txtWPosY->display(QString::number(ui->txtMPosY->text().toDouble() - workOffset.y(), 'f', prec));
             ui->txtWPosZ->display(QString::number(ui->txtMPosZ->text().toDouble() - workOffset.z(), 'f', prec));
+
+            if(m_settings->UseRotaryAxis())
+            {
+                ui->txtWPosA->display(QString::number(ui->txtMPosA->text().toDouble() - workOffsetAB[0], 'f', prec));
+                ui->txtWPosB->display(QString::number(ui->txtMPosB->text().toDouble() - workOffsetAB[1], 'f', prec));
+            }
 
             // Update tool position
             QVector3D toolPosition;
@@ -386,7 +431,7 @@ void frmMain::ProcessGRBL1_1()
                     QTextBlock tb = ui->txtConsole->document()->findBlockByNumber(ca.consoleIndex);
                     QTextCursor tc(tb);
 
-                    if(m_settings->UseM6() && ca.command.contains("M6") && response.contains("ok") && ca.command[0] != ';' && ca.command[0] != '(')
+                    if(m_settings->UseM6() && (ca.command.contains("M6") || ca.command.contains("M06")) && response.contains("ok") && ca.command[0] != ';' && ca.command[0] != '(')
                     {
                         qDebug() << "Waiting for tool change...";
 
@@ -833,12 +878,27 @@ void frmMain::ProcessGRBL_ETH(QString data)
             m_statusReceived = true;
 
             // Update machine coordinates
-            static QRegExp mpx("MPos:([^,]*),([^,]*),([^,^>^|]*)");
+            static QRegExp mpx;
+            if(!m_settings->UseRotaryAxis())
+            {
+                mpx.setPattern("MPos:([^,]*),([^,]*),([^,^>^|]*)");
+            }
+            else
+            {
+                mpx.setPattern("MPos:([^,]*),([^,]*),([^,]*),([^,]*),([^,^>^|]*)");
+            }
             if(mpx.indexIn(data) != -1)
             {
                 ui->txtMPosX->setText(mpx.cap(1));
                 ui->txtMPosY->setText(mpx.cap(2));
                 ui->txtMPosZ->setText(mpx.cap(3));
+            }
+            if(m_settings->UseRotaryAxis())
+            {
+                // Set A & B
+                //qDebug() << "A: " << mpx.cap(4);
+                ui->txtMPosA->setText(mpx.cap(4));
+                ui->txtMPosB->setText(mpx.cap(5));
             }
 
             // Status
@@ -928,6 +988,8 @@ void frmMain::ProcessGRBL_ETH(QString data)
                 static double x = sNan;
                 static double y = sNan;
                 static double z = sNan;
+                static double a = sNan;
+                static double b = sNan;
 
                 if(m_aborting)
                 {
@@ -937,7 +999,7 @@ void frmMain::ProcessGRBL_ETH(QString data)
                         if (!m_processingFile && m_resetCompleted)
                         {
                             m_aborting = false;
-                            restoreOffsets();
+                            //restoreOffsets();
                             restoreParserState();
                             return;
                         }
@@ -951,6 +1013,8 @@ void frmMain::ProcessGRBL_ETH(QString data)
                             x = sNan;
                             y = sNan;
                             z = sNan;
+                            a = sNan;
+                            b = sNan;
                             GrblReset();
                         }
                         else
@@ -958,6 +1022,8 @@ void frmMain::ProcessGRBL_ETH(QString data)
                             x = ui->txtMPosX->text().toDouble();
                             y = ui->txtMPosY->text().toDouble();
                             z = ui->txtMPosZ->text().toDouble();
+                            a = ui->txtMPosA->text().toDouble();
+                            b = ui->txtMPosB->text().toDouble();
                         }
                         break;
                     }
@@ -966,11 +1032,28 @@ void frmMain::ProcessGRBL_ETH(QString data)
 
             // Store work offset
             static QVector3D workOffset;
-            static QRegExp wpx("WCO:([^,]*),([^,]*),([^,^>^|]*)");
+            static double workOffsetAB[2] = {0.0};
+            static QRegExp wpx;
+
+            if(!m_settings->UseRotaryAxis())
+            {
+                wpx.setPattern("WCO:([^,]*),([^,]*),([^,^>^|]*)");
+            }
+            else
+            {
+                wpx.setPattern("WCO:([^,]*),([^,]*),([^,]*),([^,]*),([^,^>^|]*)");
+            }
 
             if(wpx.indexIn(data) != -1)
             {
                 workOffset = QVector3D(wpx.cap(1).toDouble(), wpx.cap(2).toDouble(), wpx.cap(3).toDouble());
+
+                // Store offsets for rotary axis
+                if(m_settings->UseRotaryAxis())
+                {
+                    workOffsetAB[0] = wpx.cap(4).toDouble();
+                    workOffsetAB[1] = wpx.cap(5).toDouble();
+                }
             }
 
             // Update work coordinates
@@ -978,6 +1061,11 @@ void frmMain::ProcessGRBL_ETH(QString data)
             ui->txtWPosX->display(QString::number(ui->txtMPosX->text().toDouble() - workOffset.x(), 'f', prec));
             ui->txtWPosY->display(QString::number(ui->txtMPosY->text().toDouble() - workOffset.y(), 'f', prec));
             ui->txtWPosZ->display(QString::number(ui->txtMPosZ->text().toDouble() - workOffset.z(), 'f', prec));
+            if(m_settings->UseRotaryAxis())
+            {
+                ui->txtWPosA->display(QString::number(ui->txtMPosA->text().toDouble() - workOffsetAB[0], 'f', prec));
+                ui->txtWPosB->display(QString::number(ui->txtMPosB->text().toDouble() - workOffsetAB[1], 'f', prec));
+            }
 
             // Update tool position
             QVector3D toolPosition;
@@ -1158,7 +1246,7 @@ void frmMain::ProcessGRBL_ETH(QString data)
                     QTextBlock tb = ui->txtConsole->document()->findBlockByNumber(ca.consoleIndex);
                     QTextCursor tc(tb);
 
-                    if(m_settings->UseM6() && ca.command.contains("M6") && response.contains("ok") && ca.command[0] != ';' && ca.command[0] != '(')
+                    if(m_settings->UseM6() && (ca.command.contains("M6") || ca.command.contains("M06")) && response.contains("ok") && ca.command[0] != ';' && ca.command[0] != '(')
                     {
                         qDebug() << "Waiting for tool change...";
 
@@ -1183,7 +1271,7 @@ void frmMain::ProcessGRBL_ETH(QString data)
                             }
                             else if(m_Protocol == PROT_GRIP)
                             {
-                                Pdu_t p = {(uint8_t*)(res.data()), res.size()};
+                                Pdu_t p = {(uint8_t*)(res.data()), (uint16_t)res.size()};
                                 GrIP_Transmit(MSG_REALTIME_CMD, 0, &p);
                             }
                             QThread::msleep(5);

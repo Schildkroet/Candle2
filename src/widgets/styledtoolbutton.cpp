@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QEvent>
 
-StyledToolButton::StyledToolButton(QWidget *parent) : QAbstractButton(parent)
+StyledToolButton::StyledToolButton(QWidget *parent) : QToolButton(parent)
 {
     m_hovered = false;
     m_backColor = palette().color(QPalette::Button);

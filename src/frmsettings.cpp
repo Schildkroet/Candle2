@@ -587,6 +587,16 @@ void frmSettings::setUseM6(bool value)
     ui->chkUseM6->setChecked(value);
 }
 
+bool frmSettings::UseRotaryAxis()
+{
+    return  ui->chkEnableRotaryAxis->isChecked();
+}
+
+void frmSettings::setUseRotaryAxis(bool value)
+{
+    ui->chkEnableRotaryAxis->setChecked(value);
+}
+
 void frmSettings::showEvent(QShowEvent *se)
 {
     Q_UNUSED(se)
