@@ -9,7 +9,7 @@ Supported functions:
 * Loading, editing, saving and sending of G-code files to CNC-Machine.
 * Visualizing G-code files.
 
-System requirements for running "Candle":
+System requirements for running "Candle2":
 -------------------
 * Windows/Linux x86_x64
 * CPU with SSE2 instruction set support
@@ -24,8 +24,8 @@ Linux: QT 5.12.2 with GCC
 Downloads:
 ----------
 
-* Windows: [Candle_2.0.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.0/Candle2.0.zip)
-* Linux: [candle_2.0.zip](tbd)
+* Windows: [Candle_2.1.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.1/Candle2.1.zip)
+* Linux: [candle_2.1_linux.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.1/Candle2.1_linux.zip)
 
 
 Candle 2 GUI
