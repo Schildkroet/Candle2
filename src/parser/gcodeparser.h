@@ -61,6 +61,8 @@ private:
     QVector3D m_currentPoint;
     int m_commandNumber;
     PointSegment::planes m_currentPlane;
+    double m_Angle;
+    bool m_isRotationMove;
 
     // Settings
     double m_speedOverride;

@@ -28,7 +28,7 @@ public:
     static QStringList splitCommand(const QString &command);
     static double parseCoord(QStringList argList, char c);
     static QVector3D updatePointWithCommand(const QVector3D &initial, double x, double y, double z, bool absoluteMode);
-    static QVector3D updatePointWithCommand(const QStringList &commandArgs, const QVector3D &initial, bool absoluteMode);
+    static QVector4D updatePointWithCommand(const QStringList &commandArgs, const QVector3D &initial, bool absoluteMode);
     static QVector3D updatePointWithCommand(const QString &command, const QVector3D &initial, bool absoluteMode);
     static QVector3D convertRToCenter(QVector3D start, QVector3D end, double radius, bool absoluteIJK, bool clockwise);
     static QVector3D updateCenterWithCommand(QStringList commandArgs, QVector3D initial, QVector3D nextPoint, bool absoluteIJKMode, bool clockwise);
@@ -40,6 +40,8 @@ public:
     static inline bool isDigit(char c);
     static inline bool isLetter(char c);
     static inline char toUpper(char c);
+
+    static QVector3D rotateAxis(const QVector3D &init, double angle);
 signals:
 
 public slots:

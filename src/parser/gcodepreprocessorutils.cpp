@@ -12,6 +12,10 @@
 #include "limits"
 #include "../tables/gcodetablemodel.h"
 
+
+#define M_PI           3.14159265358979323846  /* pi */
+
+
 /**
 * Searches the command string for an 'f' and replaces the speed value
 * between the 'f' and the next space with a percentage of that speed.
@@ -134,18 +138,22 @@ QList<int> GcodePreprocessorUtils::parseMCodes(QString command)
 QVector3D GcodePreprocessorUtils::updatePointWithCommand(const QString &command, const QVector3D &initial, bool absoluteMode)
 {
     QStringList l = splitCommand(command);
-    return updatePointWithCommand(l, initial, absoluteMode);
+    QVector4D tmp = updatePointWithCommand(l, initial, absoluteMode);
+    QVector3D ret(tmp.x(), tmp.y(), tmp.z());
+
+    return  ret;
 }
 
 /**
 * Update a point given the arguments of a command, using a pre-parsed list.
 */
-QVector3D GcodePreprocessorUtils::updatePointWithCommand(const QStringList &commandArgs, const QVector3D &initial,
+QVector4D GcodePreprocessorUtils::updatePointWithCommand(const QStringList &commandArgs, const QVector3D &initial,
                                                          bool absoluteMode)
 {
     double x = qQNaN();
     double y = qQNaN();
     double z = qQNaN();
+    double a = qQNaN();
     char c;
 
     for (int i = 0; i < commandArgs.length(); i++) {
@@ -153,19 +161,24 @@ QVector3D GcodePreprocessorUtils::updatePointWithCommand(const QStringList &comm
             c = commandArgs.at(i).at(0).toUpper().toLatin1();
             switch (c) {
             case 'X':
-                x = commandArgs.at(i).mid(1).toDouble();;
+                x = commandArgs.at(i).mid(1).toDouble();
                 break;
             case 'Y':
-                y = commandArgs.at(i).mid(1).toDouble();;
+                y = commandArgs.at(i).mid(1).toDouble();
                 break;
             case 'Z':
-                z = commandArgs.at(i).mid(1).toDouble();;
+                z = commandArgs.at(i).mid(1).toDouble();
                 break;
+            case 'A':
+                a = commandArgs.at(i).mid(1).toDouble();
             }
         }
     }
 
-    return updatePointWithCommand(initial, x, y, z, absoluteMode);
+    QVector3D tmp = updatePointWithCommand(initial, x, y, z, absoluteMode);
+    QVector4D ret(tmp.x(), tmp.y(), tmp.z(), a);
+
+    return  ret;
 }
 
 /**
@@ -539,4 +552,16 @@ bool GcodePreprocessorUtils::isLetter(char c)
 char GcodePreprocessorUtils::toUpper(char c)
 {
     return (c > 96 && c < 123) ? c - 32 : c;
+}
+
+QVector3D GcodePreprocessorUtils::rotateAxis(const QVector3D &init, double angle)
+{
+    // Rotate point around x-axis (A-axis)
+    QVector3D newPoint;
+
+    newPoint.setX(init.x());
+    newPoint.setY(init.y() * cos(angle*M_PI/180) + init.z() * sin(angle*M_PI/180));
+    newPoint.setZ(init.z() * cos(angle*M_PI/180) - init.y() * sin(angle*M_PI/180));
+
+    return newPoint;
 }

@@ -17,6 +17,8 @@ GcodeParser::GcodeParser(QObject *parent) : QObject(parent)
     m_lastGcodeCommand = -1;
     m_retractOldZ = true;
     m_commandNumber = 0;
+    m_Angle = 0;
+    m_isRotationMove = false;
 
     // Settings
     m_speedOverride = -1;
@@ -29,6 +31,8 @@ GcodeParser::GcodeParser(QObject *parent) : QObject(parent)
     m_lastSpeed = 0;
     m_lastSpindleSpeed = 0;
     m_traverseSpeed = 300;
+
+    m_currentPoint = {0, 0, 0};
 
     reset();
 }
@@ -94,7 +98,8 @@ void GcodeParser::reset(const QVector3D &initialPoint)
     foreach (PointSegment *ps, this->m_points) delete ps;
     this->m_points.clear();
     // The unspoken home location.
-    m_currentPoint = initialPoint;
+    //m_currentPoint = initialPoint;
+    m_currentPoint = QVector3D(0, 0, 0);
     m_currentPlane = PointSegment::XY;
     this->m_points.append(new PointSegment(&this->m_currentPoint, -1));
 }
@@ -252,9 +257,8 @@ PointSegment *GcodeParser::processCommand(const QStringList &args)
 
 PointSegment *GcodeParser::addLinearPointSegment(const QVector3D &nextPoint, bool fastTraverse)
 {
-    PointSegment *ps = new PointSegment(&nextPoint, m_commandNumber++);
-
     bool zOnly = false;
+    PointSegment *ps = nullptr;
 
     // Check for z-only
     if ((this->m_currentPoint.x() == nextPoint.x()) &&
@@ -263,13 +267,54 @@ PointSegment *GcodeParser::addLinearPointSegment(const QVector3D &nextPoint, boo
         zOnly = true;
     }
 
-    ps->setIsMetric(this->m_isMetric);
-    ps->setIsZMovement(zOnly);
-    ps->setIsFastTraverse(fastTraverse);
-    ps->setIsAbsolute(this->m_inAbsoluteMode);
-    ps->setSpeed(fastTraverse ? this->m_traverseSpeed : this->m_lastSpeed);
-    ps->setSpindleSpeed(this->m_lastSpindleSpeed);
-    this->m_points.append(ps);
+    if(m_Angle < 0.0001 && m_Angle > -0.0001)
+    {
+        ps = new PointSegment(&nextPoint, m_commandNumber++);
+
+        ps->setIsMetric(this->m_isMetric);
+        ps->setIsZMovement(zOnly);
+        ps->setIsFastTraverse(fastTraverse);
+        ps->setIsAbsolute(this->m_inAbsoluteMode);
+        ps->setSpeed(fastTraverse ? this->m_traverseSpeed : this->m_lastSpeed);
+        ps->setSpindleSpeed(this->m_lastSpindleSpeed);
+        this->m_points.append(ps);
+    }
+    else
+    {
+        QVector3D n = GcodePreprocessorUtils::rotateAxis(nextPoint, m_Angle);
+
+        ps = new PointSegment(&n, m_commandNumber++);
+
+        if(m_isRotationMove)
+        {
+            QVector3D center(m_currentPoint.x(), 0, 0);
+            double radius = sqrt(pow(m_currentPoint.z(), 2) + pow(m_currentPoint.y(), 2));
+            //double radius = m_currentPoint.z();
+            m_isRotationMove = false;
+
+            ps->setIsMetric(this->m_isMetric);
+            ps->setArcCenter(&center);
+            ps->setIsArc(true);
+            ps->setRadius(radius);
+            ps->setIsClockwise(true);
+            ps->setIsAbsolute(this->m_inAbsoluteMode);
+            ps->setIsFastTraverse(fastTraverse);
+            ps->setSpeed(fastTraverse ? this->m_traverseSpeed : this->m_lastSpeed);
+            ps->setSpindleSpeed(this->m_lastSpindleSpeed);
+            ps->setPlane(PointSegment::YZ);
+            this->m_points.append(ps);
+        }
+        else
+        {
+            ps->setIsMetric(this->m_isMetric);
+            ps->setIsZMovement(zOnly);
+            ps->setIsFastTraverse(fastTraverse);
+            ps->setIsAbsolute(this->m_inAbsoluteMode);
+            ps->setSpeed(fastTraverse ? this->m_traverseSpeed : this->m_lastSpeed);
+            ps->setSpindleSpeed(this->m_lastSpindleSpeed);
+            this->m_points.append(ps);
+        }
+    }
 
     // Save off the endpoint.
     this->m_currentPoint = nextPoint;
@@ -332,7 +377,25 @@ PointSegment * GcodeParser::handleGCode(float code, const QStringList &args)
 {
     PointSegment *ps = NULL;
 
-    QVector3D nextPoint = GcodePreprocessorUtils::updatePointWithCommand(args, this->m_currentPoint, this->m_inAbsoluteMode);
+    QVector4D next = GcodePreprocessorUtils::updatePointWithCommand(args, this->m_currentPoint, this->m_inAbsoluteMode);
+
+    QVector3D nextPoint(next.x(), next.y(), next.z());
+
+    if(!qIsNaN(next.w()))
+    {
+        /*PointSegment::planes m_currentP = m_currentPlane;
+        m_currentPlane = PointSegment::YZ;
+
+        QStringList t(args);
+        t.append("R3");
+
+        ps = addArcPointSegment(nextPoint, true, t);
+        m_currentPlane = m_currentP;
+
+        return ps;*/
+        m_Angle = next.w();
+        m_isRotationMove = true;
+    }
 
     if (code == 0.0f) ps = addLinearPointSegment(nextPoint, true);
     else if (code == 1.0f) ps = addLinearPointSegment(nextPoint, false);
