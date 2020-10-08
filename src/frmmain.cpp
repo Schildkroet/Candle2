@@ -41,7 +41,7 @@
 
 
 static const int ReceiveTimerInterval_ms = 10;
-static const int SendTimerInterval_ms = 40;
+static const int SendTimerInterval_ms = 30;
 
 
 frmMain::frmMain(QWidget *parent) :
@@ -103,7 +103,6 @@ frmMain::frmMain(QWidget *parent) :
                        << "black"
                        << "black"
                        << "black";
-
 
     // Loading settings
     m_settingsFileName = qApp->applicationDirPath() + settings_file;
@@ -331,6 +330,9 @@ frmMain::frmMain(QWidget *parent) :
 
     // Set default protocol grbl 1.1
     m_Protocol = PROT_GRBL1_1;
+
+    // Set isometric view
+    ui->glwVisualizer->setIsometricView();
 
     // Start timers
     m_timerSpindleUpdate.start(400);
@@ -720,59 +722,62 @@ void frmMain::onProcessData()
 
 void frmMain::onSendSerial()
 {
-    if(mCommandsWait.size() > 0)
+    for(int i = 0; i < 4; i++)
     {
-        if (!SerialIf_IsOpen())
+        if(mCommandsWait.size() > 0)
         {
-            return;
-        }
-
-        CommandQueue2 q = mCommandsWait.front();
-        QString command(q.command);
-
-        if((BufferLength() + command.length() + 1) < GRBL_BUFFERLENGTH && !m_toolChangeActive)
-        {
-            mCommandsSent.push_back(q);
-            mCommandsWait.pop_front();
-
-            // Processing spindle speed only from g-code program
-            /*QRegExp s("[Ss]0*(\\d+)");
-            if (s.indexIn(command) != -1 && ca.tableIndex > -2)
+            if (!SerialIf_IsOpen())
             {
-                int speed = s.cap(1).toInt();
-                if (ui->slbSpindle->value() != speed)
+                return;
+            }
+
+            CommandQueue2 q = mCommandsWait.front();
+            QString command(q.command);
+
+            if((BufferLength() + command.length() + 1) < GRBL_BUFFERLENGTH && !m_toolChangeActive)
+            {
+                mCommandsSent.push_back(q);
+                mCommandsWait.pop_front();
+
+                // Processing spindle speed only from g-code program
+                /*QRegExp s("[Ss]0*(\\d+)");
+                if (s.indexIn(command) != -1 && ca.tableIndex > -2)
                 {
-                    ui->slbSpindle->setValue(speed);
+                    int speed = s.cap(1).toInt();
+                    if (ui->slbSpindle->value() != speed)
+                    {
+                        ui->slbSpindle->setValue(speed);
+                    }
+                }*/
+
+                //qDebug() << "Send: " + command;
+
+                // Set M2 & M30 commands sent flag
+                if (command.contains(QRegExp("M0*2|M30")))
+                {
+                    m_fileEndSent = true;
                 }
-            }*/
 
-            //qDebug() << "Send: " + command;
+                if(m_settings->UseM6() && (command.contains("M6") || command.contains("M06")) && command[0] != '(' && command[0] != ';')
+                {
+                    qDebug() << "Tool change command";
+                    m_toolChangeActive = true;
+                }
 
-            // Set M2 & M30 commands sent flag
-            if (command.contains(QRegExp("M0*2|M30")))
-            {
-                m_fileEndSent = true;
+                if(m_Protocol == PROT_GRBL1_1)
+                {
+                    SerialIf_Write((command + "\r").toLatin1());
+                }
+                else if(m_Protocol == PROT_GRIP)
+                {
+                    QByteArray data((command + "\r").toLatin1());
+                    //GrIP_Transmit(MSG_DATA_NO_RESPONSE, 0, (const uint8_t*)data.constData(), data.length());
+                    Pdu_t p = {(uint8_t*)data.data(), (uint16_t)data.length()};
+                    GrIP_Transmit(MSG_DATA_NO_RESPONSE, 0, &p);
+                }
+
+                m_currentModel->setData(m_currentModel->index(q.tableIndex, 2), GCodeItem::Sent);
             }
-
-            if(m_settings->UseM6() && (command.contains("M6") || command.contains("M06")) && command[0] != '(' && command[0] != ';')
-            {
-                qDebug() << "Tool change command";
-                m_toolChangeActive = true;
-            }
-
-            if(m_Protocol == PROT_GRBL1_1)
-            {
-                SerialIf_Write((command + "\r").toLatin1());
-            }
-            else if(m_Protocol == PROT_GRIP)
-            {
-                QByteArray data((command + "\r").toLatin1());
-                //GrIP_Transmit(MSG_DATA_NO_RESPONSE, 0, (const uint8_t*)data.constData(), data.length());
-                Pdu_t p = {(uint8_t*)data.data(), (uint16_t)data.length()};
-                GrIP_Transmit(MSG_DATA_NO_RESPONSE, 0, &p);
-            }
-
-            m_currentModel->setData(m_currentModel->index(q.tableIndex, 2), GCodeItem::Sent);
         }
     }
 }
