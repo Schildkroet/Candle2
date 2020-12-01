@@ -236,6 +236,10 @@ private slots:
 
     void on_btnHandwheel_clicked();
 
+    void on_btnSetCoord_clicked();
+
+    void on_btnSaveCoord_clicked();
+
 protected:
     void showEvent(QShowEvent *se);
     void hideEvent(QHideEvent *he);
@@ -367,6 +371,8 @@ private:
     QStringList m_statusCaptions;
     QStringList m_statusBackColors;
     QStringList m_statusForeColors;
+
+    QStringList m_coord;
 
 #ifdef WINDOWS
     QWinTaskbarButton *m_taskBarButton;

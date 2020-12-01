@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1170</width>
-    <height>881</height>
+    <width>1430</width>
+    <height>941</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -567,129 +567,832 @@ QSlider::handle:horizontal:hover {
               </widget>
              </item>
              <item>
-              <widget class="GroupBox" name="grpConsole">
-               <property name="font">
-                <font>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
+              <widget class="QTabWidget" name="tabWidget">
                <property name="autoFillBackground">
                 <bool>false</bool>
                </property>
-               <property name="title">
-                <string>Console</string>
+               <property name="currentIndex">
+                <number>0</number>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <property name="leftMargin">
-                 <number>8</number>
-                </property>
-                <property name="topMargin">
-                 <number>8</number>
-                </property>
-                <property name="rightMargin">
-                 <number>8</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>8</number>
-                </property>
-                <item>
-                 <widget class="QPlainTextEdit" name="txtConsole">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>1</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                   </font>
-                  </property>
-                  <property name="readOnly">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="spacerConsole">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeType">
-                   <enum>QSizePolicy::Fixed</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>7</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,0,0">
-                  <item>
-                   <widget class="ComboBox" name="cboCommand">
-                    <property name="styleSheet">
-                     <string notr="true">padding-top: 3;
+               <property name="elideMode">
+                <enum>Qt::ElideMiddle</enum>
+               </property>
+               <widget class="QWidget" name="tab">
+                <attribute name="title">
+                 <string>Console</string>
+                </attribute>
+                <layout class="QHBoxLayout" name="horizontalLayout_33">
+                 <item>
+                  <widget class="GroupBox" name="grpConsole">
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="autoFillBackground">
+                    <bool>false</bool>
+                   </property>
+                   <property name="title">
+                    <string>Console</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>8</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>8</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>8</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>8</number>
+                    </property>
+                    <item>
+                     <widget class="QPlainTextEdit" name="txtConsole">
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>1</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>9</pointsize>
+                       </font>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="spacerConsole">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>7</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,0,0">
+                      <item>
+                       <widget class="ComboBox" name="cboCommand">
+                        <property name="styleSheet">
+                         <string notr="true">padding-top: 3;
 padding-bottom: 3;
 padding-right: 8;</string>
+                        </property>
+                        <property name="editable">
+                         <bool>true</bool>
+                        </property>
+                        <property name="maxVisibleItems">
+                         <number>5</number>
+                        </property>
+                        <property name="maxCount">
+                         <number>10</number>
+                        </property>
+                        <property name="insertPolicy">
+                         <enum>QComboBox::InsertAtTop</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="cmdCommandSend">
+                        <property name="toolTip">
+                         <string>Send command</string>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="images.qrc">
+                          <normaloff>:/images/send_1.png</normaloff>:/images/send_1.png</iconset>
+                        </property>
+                        <property name="iconSize">
+                         <size>
+                          <width>16</width>
+                          <height>16</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="cmdClearConsole">
+                        <property name="toolTip">
+                         <string>Clear console</string>
+                        </property>
+                        <property name="icon">
+                         <iconset resource="images.qrc">
+                          <normaloff>:/images/erase_1.png</normaloff>:/images/erase_1.png</iconset>
+                        </property>
+                        <property name="iconSize">
+                         <size>
+                          <width>16</width>
+                          <height>16</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="tab_2">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <attribute name="title">
+                 <string>Coord System</string>
+                </attribute>
+                <layout class="QVBoxLayout" name="verticalLayout_13">
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout_12">
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_35">
+                     <property name="spacing">
+                      <number>6</number>
+                     </property>
+                     <property name="sizeConstraint">
+                      <enum>QLayout::SetDefaultConstraint</enum>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="label_31">
+                       <property name="font">
+                        <font>
+                         <weight>75</weight>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Coordinate System</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="cboCoord1">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                         <horstretch>60</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>60</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="currentIndex">
+                        <number>0</number>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>6</number>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>G54</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G55</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G56</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G57</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G58</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G59</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_13">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="btnSetCoord">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="text">
+                        <string>Load</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <spacer name="verticalSpacer_2">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Fixed</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>13</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_42" stretch="0,0,0,0,0,0,0,0,0,0">
+                     <property name="spacing">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="label_23">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <weight>75</weight>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>G10 L20 P</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="cboCoord2">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>60</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="currentIndex">
+                        <number>0</number>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>6</number>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>G54</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G55</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G56</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G57</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G58</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>G59</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_24">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>10</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <weight>75</weight>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>X</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="txtCoordX">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>5</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="layoutDirection">
+                        <enum>Qt::RightToLeft</enum>
+                       </property>
+                       <property name="text">
+                        <string>0</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_25">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>10</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <weight>75</weight>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Y</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="txtCoordY">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>20</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>0</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_26">
+                       <property name="maximumSize">
+                        <size>
+                         <width>10</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <weight>75</weight>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Z</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="txtCoordZ">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>20</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>0</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_10">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeType">
+                        <enum>QSizePolicy::Fixed</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>18</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="btnSaveCoord">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="text">
+                        <string>Set</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <spacer name="verticalSpacer_3">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="tab_3">
+                <attribute name="title">
+                 <string>User Cmd</string>
+                </attribute>
+                <layout class="QHBoxLayout" name="horizontalLayout_34">
+                 <item>
+                  <widget class="GroupBox" name="grpUserCommands">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="title">
+                    <string>User commands</string>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
+                   </property>
+                   <property name="overrided" stdset="0">
+                    <bool>false</bool>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_30">
+                    <property name="spacing">
+                     <number>9</number>
                     </property>
-                    <property name="editable">
-                     <bool>true</bool>
+                    <property name="leftMargin">
+                     <number>8</number>
                     </property>
-                    <property name="maxVisibleItems">
-                     <number>5</number>
+                    <property name="topMargin">
+                     <number>8</number>
                     </property>
-                    <property name="maxCount">
-                     <number>10</number>
+                    <property name="rightMargin">
+                     <number>8</number>
                     </property>
-                    <property name="insertPolicy">
-                     <enum>QComboBox::InsertAtTop</enum>
+                    <property name="bottomMargin">
+                     <number>8</number>
                     </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="cmdCommandSend">
-                    <property name="toolTip">
-                     <string>Send command</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="images.qrc">
-                      <normaloff>:/images/send_1.png</normaloff>:/images/send_1.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>16</width>
-                      <height>16</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="cmdClearConsole">
-                    <property name="toolTip">
-                     <string>Clear console</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="images.qrc">
-                      <normaloff>:/images/erase_1.png</normaloff>:/images/erase_1.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>16</width>
-                      <height>16</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
+                    <item>
+                     <widget class="QWidget" name="widgetUserCommands" native="true">
+                      <layout class="QHBoxLayout" name="horizontalLayout_31">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <layout class="QGridLayout" name="gridLayout_7">
+                         <property name="horizontalSpacing">
+                          <number>8</number>
+                         </property>
+                         <item row="0" column="1">
+                          <widget class="StyledToolButton" name="cmdUser1">
+                           <property name="enabled">
+                            <bool>true</bool>
+                           </property>
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>44</width>
+                             <height>44</height>
+                            </size>
+                           </property>
+                           <property name="toolTip">
+                            <string>Spindle on/off</string>
+                           </property>
+                           <property name="icon">
+                            <iconset resource="images.qrc">
+                             <normaloff>:/images/num2.png</normaloff>:/images/num2.png</iconset>
+                           </property>
+                           <property name="iconSize">
+                            <size>
+                             <width>30</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <property name="popupMode">
+                            <enum>QToolButton::InstantPopup</enum>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="3">
+                          <widget class="StyledToolButton" name="cmdUser3">
+                           <property name="enabled">
+                            <bool>true</bool>
+                           </property>
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>44</width>
+                             <height>44</height>
+                            </size>
+                           </property>
+                           <property name="toolTip">
+                            <string>Spindle on/off</string>
+                           </property>
+                           <property name="icon">
+                            <iconset resource="images.qrc">
+                             <normaloff>:/images/num4.png</normaloff>:/images/num4.png</iconset>
+                           </property>
+                           <property name="iconSize">
+                            <size>
+                             <width>30</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <property name="popupMode">
+                            <enum>QToolButton::InstantPopup</enum>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="2">
+                          <widget class="StyledToolButton" name="cmdUser2">
+                           <property name="enabled">
+                            <bool>true</bool>
+                           </property>
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>44</width>
+                             <height>44</height>
+                            </size>
+                           </property>
+                           <property name="toolTip">
+                            <string>Spindle on/off</string>
+                           </property>
+                           <property name="icon">
+                            <iconset resource="images.qrc">
+                             <normaloff>:/images/num3.png</normaloff>:/images/num3.png</iconset>
+                           </property>
+                           <property name="iconSize">
+                            <size>
+                             <width>30</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <property name="popupMode">
+                            <enum>QToolButton::InstantPopup</enum>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="0">
+                          <widget class="StyledToolButton" name="cmdUser0">
+                           <property name="enabled">
+                            <bool>true</bool>
+                           </property>
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>44</width>
+                             <height>44</height>
+                            </size>
+                           </property>
+                           <property name="toolTip">
+                            <string>Spindle on/off</string>
+                           </property>
+                           <property name="icon">
+                            <iconset resource="images.qrc">
+                             <normaloff>:/images/num1.png</normaloff>:/images/num1.png</iconset>
+                           </property>
+                           <property name="iconSize">
+                            <size>
+                             <width>30</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <property name="popupMode">
+                            <enum>QToolButton::InstantPopup</enum>
+                           </property>
+                           <property name="toolButtonStyle">
+                            <enum>Qt::ToolButtonTextUnderIcon</enum>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="tab_7">
+                <attribute name="title">
+                 <string>Override</string>
+                </attribute>
+                <layout class="QHBoxLayout" name="horizontalLayout_43">
+                 <item>
+                  <layout class="QGridLayout" name="gridLayout_2">
+                   <item row="0" column="0">
+                    <widget class="GroupBox" name="grpOverriding">
+                     <property name="enabled">
+                      <bool>true</bool>
+                     </property>
+                     <property name="font">
+                      <font>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="title">
+                      <string>Overriding</string>
+                     </property>
+                     <property name="checkable">
+                      <bool>true</bool>
+                     </property>
+                     <property name="overrided" stdset="0">
+                      <bool>false</bool>
+                     </property>
+                     <layout class="QHBoxLayout" name="horizontalLayout_14">
+                      <property name="leftMargin">
+                       <number>8</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>8</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>8</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>8</number>
+                      </property>
+                      <item>
+                       <widget class="QWidget" name="widgetFeed" native="true">
+                        <layout class="QVBoxLayout" name="verticalLayout_22">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="SliderBox" name="slbFeedOverride" native="true"/>
+                         </item>
+                         <item>
+                          <widget class="SliderBox" name="slbRapidOverride" native="true"/>
+                         </item>
+                         <item>
+                          <widget class="SliderBox" name="slbSpindleOverride" native="true"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
               </widget>
              </item>
             </layout>
@@ -2307,7 +3010,7 @@ padding-right: 8;</string>
             <x>0</x>
             <y>0</y>
             <width>385</width>
-            <height>738</height>
+            <height>554</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -2942,237 +3645,6 @@ padding-right: 8;</string>
             </widget>
            </item>
            <item>
-            <widget class="GroupBox" name="grpOverriding">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="title">
-              <string>Overriding</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="overrided" stdset="0">
-              <bool>false</bool>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_14">
-              <property name="leftMargin">
-               <number>8</number>
-              </property>
-              <property name="topMargin">
-               <number>8</number>
-              </property>
-              <property name="rightMargin">
-               <number>8</number>
-              </property>
-              <property name="bottomMargin">
-               <number>8</number>
-              </property>
-              <item>
-               <widget class="QWidget" name="widgetFeed" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_22">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="SliderBox" name="slbFeedOverride" native="true"/>
-                 </item>
-                 <item>
-                  <widget class="SliderBox" name="slbRapidOverride" native="true"/>
-                 </item>
-                 <item>
-                  <widget class="SliderBox" name="slbSpindleOverride" native="true"/>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="GroupBox" name="grpUserCommands">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="title">
-              <string>User commands</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-             <property name="overrided" stdset="0">
-              <bool>false</bool>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_30">
-              <property name="spacing">
-               <number>9</number>
-              </property>
-              <property name="leftMargin">
-               <number>8</number>
-              </property>
-              <property name="topMargin">
-               <number>8</number>
-              </property>
-              <property name="rightMargin">
-               <number>8</number>
-              </property>
-              <property name="bottomMargin">
-               <number>8</number>
-              </property>
-              <item>
-               <widget class="QWidget" name="widgetUserCommands" native="true">
-                <layout class="QHBoxLayout" name="horizontalLayout_31">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <layout class="QGridLayout" name="gridLayout_7">
-                   <property name="horizontalSpacing">
-                    <number>8</number>
-                   </property>
-                   <item row="0" column="1">
-                    <widget class="StyledToolButton" name="cmdUser1">
-                     <property name="enabled">
-                      <bool>true</bool>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>44</width>
-                       <height>44</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>Spindle on/off</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num2.png</normaloff>:/images/num2.png</iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>30</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="3">
-                    <widget class="StyledToolButton" name="cmdUser3">
-                     <property name="enabled">
-                      <bool>true</bool>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>44</width>
-                       <height>44</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>Spindle on/off</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num4.png</normaloff>:/images/num4.png</iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>30</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="StyledToolButton" name="cmdUser2">
-                     <property name="enabled">
-                      <bool>true</bool>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>44</width>
-                       <height>44</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>Spindle on/off</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num3.png</normaloff>:/images/num3.png</iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>30</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="StyledToolButton" name="cmdUser0">
-                     <property name="enabled">
-                      <bool>true</bool>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>44</width>
-                       <height>44</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>Spindle on/off</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="images.qrc">
-                       <normaloff>:/images/num1.png</normaloff>:/images/num1.png</iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>30</width>
-                       <height>30</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
             <widget class="GroupBox" name="grpHeightMap">
              <property name="enabled">
               <bool>true</bool>
@@ -3351,7 +3823,7 @@ padding-right: 8;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1170</width>
+     <width>1430</width>
      <height>22</height>
     </rect>
    </property>
@@ -3560,7 +4032,6 @@ padding-right: 8;</string>
   <tabstop>cmdHeightMapMode</tabstop>
   <tabstop>grpSpindle</tabstop>
   <tabstop>cmdSpindle</tabstop>
-  <tabstop>grpOverriding</tabstop>
   <tabstop>cmdXMinus</tabstop>
   <tabstop>cmdXPlus</tabstop>
   <tabstop>cmdYPlus</tabstop>

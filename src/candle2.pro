@@ -9,7 +9,6 @@ QT       = core gui opengl serialport widgets network
 win32: {
     QT += winextras
     DEFINES += WINDOWS
-    QMAKE_LFLAGS += "-Wl,--large-address-aware"
     QMAKE_CFLAGS += -std=c11
     QMAKE_CXXFLAGS_DEBUG += -g3 -pg -std=c++14
     QMAKE_LFLAGS_DEBUG += -pg -lgmon

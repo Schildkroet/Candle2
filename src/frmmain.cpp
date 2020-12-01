@@ -104,6 +104,13 @@ frmMain::frmMain(QWidget *parent) :
                        << "black"
                        << "black";
 
+    m_coord << "G54"
+            << "G55"
+            << "G56"
+            << "G57"
+            << "G58"
+            << "G59";
+
     // Loading settings
     m_settingsFileName = qApp->applicationDirPath() + settings_file;
     preloadSettings();
@@ -282,6 +289,12 @@ frmMain::frmMain(QWidget *parent) :
     {
         connect(button, SIGNAL(clicked(bool)), this, SLOT(onCmdJogFeedClicked()));
     }
+
+    // Prepare User Buttons
+    ui->cmdUser0->setText(m_settings->userCommands(0));
+    ui->cmdUser1->setText(m_settings->userCommands(1));
+    ui->cmdUser2->setText(m_settings->userCommands(2));
+    ui->cmdUser3->setText(m_settings->userCommands(3));
 
     // Setting up spindle slider box
     ui->slbSpindle->setTitle(tr("Speed:"));
@@ -463,6 +476,10 @@ void frmMain::updateControlsState()
     ui->widgetJog->setEnabled(portOpened && !m_processingFile);
     ui->cboCommand->setEnabled(portOpened && (!ui->chkKeyboardControl->isChecked()));
     ui->cmdCommandSend->setEnabled(portOpened);
+
+    ui->tabWidget->setTabEnabled(1, portOpened);
+    ui->tabWidget->setTabEnabled(2, portOpened);
+    ui->tabWidget->setTabEnabled(3, portOpened);
 
     ui->chkTestMode->setEnabled(portOpened && !m_processingFile);
     ui->cmdHome->setEnabled(!m_processingFile);
@@ -2183,4 +2200,21 @@ void frmMain::on_btnHandwheel_clicked()
         ui->btnHandwheel->setPalette(QPalette(QColor(255, 140, 140)));
         ui->comboHandwheel->setEnabled(true);
     }
+}
+
+void frmMain::on_btnSetCoord_clicked()
+{
+    sendCommand(m_coord[ui->cboCoord1->currentIndex()], -1, m_settings->showUICommands());
+}
+
+void frmMain::on_btnSaveCoord_clicked()
+{
+    QString cmd = "G10L20P";
+
+    cmd += QString::number(ui->cboCoord2->currentIndex() + 1);
+    cmd += "X" + ui->txtCoordX->text();
+    cmd += "Y" + ui->txtCoordY->text();
+    cmd += "Z" + ui->txtCoordZ->text();
+
+    sendCommand(cmd, -1, m_settings->showUICommands());
 }
