@@ -348,7 +348,7 @@ frmMain::frmMain(QWidget *parent) :
     ui->glwVisualizer->setIsometricView();
 
     // Start timers
-    m_timerSpindleUpdate.start(400);
+    m_timerSpindleUpdate.start(500);
     m_timerStateQuery.start(200);
     m_timerSend.start(SendTimerInterval_ms);
 }
@@ -2205,6 +2205,7 @@ void frmMain::on_btnHandwheel_clicked()
 void frmMain::on_btnSetCoord_clicked()
 {
     sendCommand(m_coord[ui->cboCoord1->currentIndex()], -1, m_settings->showUICommands());
+    m_updateParserStatus = true;
 }
 
 void frmMain::on_btnSaveCoord_clicked()

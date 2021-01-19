@@ -25,7 +25,7 @@ Downloads:
 ----------
 
 * Windows: [Candle_2.1.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.1/Candle2.1.zip)
-* Linux: [candle_2.1_linux.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.1/Candle2.1_linux.zip)
+* Linux: [Candle_2.1_linux.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.1/Candle2.1_linux.zip)
 
 
 Candle 2 GUI

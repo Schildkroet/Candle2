@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1430</width>
-    <height>941</height>
+    <width>1646</width>
+    <height>887</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -729,10 +729,10 @@ padding-right: 8;</string>
                       <enum>QLayout::SetDefaultConstraint</enum>
                      </property>
                      <property name="leftMargin">
-                      <number>0</number>
+                      <number>10</number>
                      </property>
                      <property name="rightMargin">
-                      <number>0</number>
+                      <number>10</number>
                      </property>
                      <item>
                       <widget class="QLabel" name="label_31">
@@ -750,14 +750,20 @@ padding-right: 8;</string>
                      <item>
                       <widget class="QComboBox" name="cboCoord1">
                        <property name="sizePolicy">
-                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                         <horstretch>60</horstretch>
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>50</horstretch>
                          <verstretch>0</verstretch>
                         </sizepolicy>
                        </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>50</width>
+                         <height>0</height>
+                        </size>
+                       </property>
                        <property name="maximumSize">
                         <size>
-                         <width>60</width>
+                         <width>50</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -806,7 +812,7 @@ padding-right: 8;</string>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
-                         <width>40</width>
+                         <width>30</width>
                          <height>20</height>
                         </size>
                        </property>
@@ -819,6 +825,18 @@ padding-right: 8;</string>
                          <horstretch>0</horstretch>
                          <verstretch>0</verstretch>
                         </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
                        </property>
                        <property name="text">
                         <string>Load</string>
@@ -848,6 +866,12 @@ padding-right: 8;</string>
                      <property name="spacing">
                       <number>10</number>
                      </property>
+                     <property name="leftMargin">
+                      <number>10</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>10</number>
+                     </property>
                      <item>
                       <widget class="QLabel" name="label_23">
                        <property name="sizePolicy">
@@ -871,13 +895,19 @@ padding-right: 8;</string>
                       <widget class="QComboBox" name="cboCoord2">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
+                         <horstretch>50</horstretch>
                          <verstretch>0</verstretch>
                         </sizepolicy>
                        </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>50</width>
+                         <height>0</height>
+                        </size>
+                       </property>
                        <property name="maximumSize">
                         <size>
-                         <width>60</width>
+                         <width>50</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -1063,11 +1093,11 @@ padding-right: 8;</string>
                         <enum>Qt::Horizontal</enum>
                        </property>
                        <property name="sizeType">
-                        <enum>QSizePolicy::Fixed</enum>
+                        <enum>QSizePolicy::Expanding</enum>
                        </property>
                        <property name="sizeHint" stdset="0">
                         <size>
-                         <width>18</width>
+                         <width>20</width>
                          <height>20</height>
                         </size>
                        </property>
@@ -1080,6 +1110,12 @@ padding-right: 8;</string>
                          <horstretch>0</horstretch>
                          <verstretch>0</verstretch>
                         </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
                        </property>
                        <property name="text">
                         <string>Set</string>
@@ -1199,6 +1235,9 @@ padding-right: 8;</string>
                            <property name="popupMode">
                             <enum>QToolButton::InstantPopup</enum>
                            </property>
+                           <property name="toolButtonStyle">
+                            <enum>Qt::ToolButtonTextUnderIcon</enum>
+                           </property>
                           </widget>
                          </item>
                          <item row="0" column="3">
@@ -1234,6 +1273,9 @@ padding-right: 8;</string>
                            <property name="popupMode">
                             <enum>QToolButton::InstantPopup</enum>
                            </property>
+                           <property name="toolButtonStyle">
+                            <enum>Qt::ToolButtonTextUnderIcon</enum>
+                           </property>
                           </widget>
                          </item>
                          <item row="0" column="2">
@@ -1268,6 +1310,9 @@ padding-right: 8;</string>
                            </property>
                            <property name="popupMode">
                             <enum>QToolButton::InstantPopup</enum>
+                           </property>
+                           <property name="toolButtonStyle">
+                            <enum>Qt::ToolButtonTextUnderIcon</enum>
                            </property>
                           </widget>
                          </item>
@@ -3009,8 +3054,8 @@ padding-right: 8;</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>385</width>
-            <height>554</height>
+            <width>378</width>
+            <height>494</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -3823,8 +3868,8 @@ padding-right: 8;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1430</width>
-     <height>22</height>
+     <width>1646</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="mnuFile">
