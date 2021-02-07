@@ -24,8 +24,8 @@ Linux: QT 5.12.2 with GCC
 Downloads:
 ----------
 
-* Windows: [Candle_2.2.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.1/Candle2.2.zip)
-* Linux: [Candle_2.2_Linux.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.1/Candle2.2_Linux.zip)
+* Windows: (Will be published within the next days)
+* Linux: [Candle_2.2_Linux.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.2/Candle2.2_Linux.zip)
 
 
 Candle 2 GUI
