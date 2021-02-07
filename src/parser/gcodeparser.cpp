@@ -407,12 +407,50 @@ PointSegment * GcodeParser::handleGCode(float code, const QStringList &args)
     else if (code == 19.0f) this->m_currentPlane = PointSegment::YZ;
     else if (code == 20.0f) this->m_isMetric = false;
     else if (code == 21.0f) this->m_isMetric = true;
+    else if (code == 33.0f) ps = addLinearPointSegment(nextPoint, false);
     else if (code == 90.0f) this->m_inAbsoluteMode = true;
     else if (code == 90.1f) this->m_inAbsoluteIJKMode = true;
     else if (code == 91.0f) this->m_inAbsoluteMode = false;
     else if (code == 91.1f) this->m_inAbsoluteIJKMode = false;
     else if (code == 98.0f) this->m_retractOldZ = true;
     else if (code == 99.0f) this->m_retractOldZ = false;
+
+    else if (code == 76.0f)
+    {
+        // Currently only display the final cut
+        QVector3D dl_start(m_currentPoint);
+        QVector3D dl_end(m_currentPoint);
+        dl_end.setZ(nextPoint.z());
+        char c;
+        double p = qQNaN();
+        double j = qQNaN();
+        double k = qQNaN();
+
+        for (int i = 0; i < args.length(); i++) {
+            if (args.at(i).length() > 0) {
+                c = args.at(i).at(0).toUpper().toLatin1();
+                switch (c) {
+                case 'I':
+                    p = args.at(i).mid(1).toDouble();
+                    break;
+                case 'J':
+                    j = args.at(i).mid(1).toDouble();
+                    break;
+                case 'K':
+                    k = args.at(i).mid(1).toDouble();
+                    break;
+                }
+            }
+        }
+
+        float fin_depth = m_currentPoint.x() + p - k;
+
+        dl_start.setX(fin_depth);
+        addLinearPointSegment(dl_start, true);
+        dl_start.setZ(dl_end.z());
+        addLinearPointSegment(dl_start, false);
+        ps = addLinearPointSegment(dl_end, true);
+    }
 
     else if (code == 81.0f || code == 82.0f || code == 83.0f)
     {

@@ -718,7 +718,7 @@ void frmMain::onProcessData()
         break;
     }
 
-    if(m_serialHandWheel.isOpen() && m_serialHandWheel.canReadLine() && m_transferCompleted)
+    if(m_serialHandWheel.isOpen() && SerialIf_IsOpen() && m_serialHandWheel.canReadLine() && m_transferCompleted)
     {
         QString msg = m_serialHandWheel.readLine();
         //qDebug() << "HW: " << msg;
@@ -801,6 +801,8 @@ void frmMain::onSendSerial()
 
 void frmMain::onTimerUpdateSpindleParser()
 {
+    static bool updateSpinde = false;
+
     if (SerialIf_IsOpen() && !m_homing && !ui->cmdFilePause->isChecked() && mCommandsWait.size() == 0)
     {
         if (m_updateSpindleSpeed)
@@ -808,8 +810,8 @@ void frmMain::onTimerUpdateSpindleParser()
             m_updateSpindleSpeed = false;
             sendCommand(QString("S%1").arg(ui->slbSpindle->value()), -2, m_settings->showUICommands());
         }
-
-        if (m_updateParserStatus)
+        updateSpinde = !updateSpinde;
+        if (m_updateParserStatus || updateSpinde)
         {
             m_updateParserStatus = false;
             sendCommand("$G", -3, false);
