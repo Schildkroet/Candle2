@@ -18,13 +18,13 @@ System requirements for running "Candle2":
 
 Build requirements:
 ------------------
-Windows: Qt 5.4.2 with MinGW/GCC compiler
+Windows: Qt 5.15.2 with MinGW/GCC compiler
 Linux: QT 5.12.2 with GCC
 
 Downloads:
 ----------
 
-* Windows: (Will be published within the next days)
+* Windows: [Candle_2.2.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.2/Candle2.2.zip)
 * Linux: [Candle_2.2_Linux.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.2/Candle2.2_Linux.zip)
 
 
