@@ -137,7 +137,7 @@ qint64 SerialIf_Write(const QByteArray &data)
         {
             qDebug() << "Error: " << m_tcpSocket.errorString();
         }
-        m_tcpSocket.waitForBytesWritten(6);
+        m_tcpSocket.waitForBytesWritten(4);
 
         return bytes;
     }

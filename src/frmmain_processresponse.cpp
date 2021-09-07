@@ -413,14 +413,11 @@ void frmMain::ProcessGRBL1_1()
             // Processed commands
             //if(m_CommandAttributesList.length() > 0 && !DataIsFloating(data) && !(m_CommandAttributesList[0].command != "[CTRL+X]" && DataIsReset(data)))
             auto &val = mCommandsSent.front();
-            //int i = mCommandsSent.size();
-            //QString tt = val.command;
 
             if(mCommandsSent.size() > 0 && !DataIsFloating(data) && !(val.command != "[CTRL+X]" && DataIsReset(data)))
             {
                 static QString response; // Full response string
 
-                //if((m_CommandAttributesList[0].command != "[CTRL+X]" && DataIsEnd(data)) || (m_CommandAttributesList[0].command == "[CTRL+X]" && DataIsReset(data)))
                 if((mCommandsSent.front().command != "[CTRL+X]" && DataIsEnd(data)) || (mCommandsSent.front().command == "[CTRL+X]" && DataIsReset(data)))
                 {
                     response.append(data);
@@ -437,21 +434,23 @@ void frmMain::ProcessGRBL1_1()
 
                         int ret = QMessageBox::information(this, qApp->applicationDisplayName(), tr("Confirm tool change"), QMessageBox::Ok | QMessageBox::Abort);
 
-                        QString res = "$T\r";
+                        const char res[4] = "$T\r";
 
                         if(ret == QMessageBox::Ok)
                         {
                             if(m_Protocol == PROT_GRBL1_1)
                             {
-                                SerialIf_Write((const char*)res.constData(), res.size());
-                                SerialIf_Write("\r", 1);
+                                SerialIf_Write(res, strlen(res));
+                                //SerialIf_Write("\r", 1);
                             }
                             else if(m_Protocol == PROT_GRIP)
                             {
-                                //GrIP_Transmit(MSG_SYSTEM_CMD, 0, (const uint8_t*)res.constData(), res.size());
-                                Pdu_t p = {(uint8_t*)res.data(), 1};
+                                uint8_t ttt[3] = {'$', 'T', '\r'};
+                                Pdu_t p = {ttt, 3};
                                 GrIP_Transmit(MSG_REALTIME_CMD, 0, &p);
                             }
+                            ca.command = "$T";
+                            mCommandsSent.push_front(ca);
                         }
 
                         m_jogVector.setZ(0.0);
@@ -841,9 +840,10 @@ void frmMain::ProcessGRBL1_1()
                 ui->txtConsole->appendPlainText(data);
             }
         }
-        else
+        else if(data.size() > 2)
         {
             // Blank response
+            qDebug() << "Unknown: " << data;
         }
     }
 }
@@ -855,7 +855,7 @@ void frmMain::ProcessGRBL_ETH(QString data)
     {
         data = data.trimmed();
 
-        qDebug() << "-- " << data << " --";
+        //qDebug() << "-- " << data << " --";
 
         // Filter prereset responses
         if(m_reseting)
@@ -1111,9 +1111,9 @@ void frmMain::ProcessGRBL_ETH(QString data)
                 }
                 else if(m_lastDrawnLineIndex < list.count())
                 {
-                    qDebug() << "tool missed:" << list.at(m_lastDrawnLineIndex)->getLineNumber()
+                   /* qDebug() << "tool missed:" << list.at(m_lastDrawnLineIndex)->getLineNumber()
                              << m_currentModel->data(m_currentModel->index(m_fileProcessedCommandIndex, 4)).toInt()
-                             << m_fileProcessedCommandIndex;
+                             << m_fileProcessedCommandIndex;*/
                 }
             }
 
@@ -1235,6 +1235,8 @@ void frmMain::ProcessGRBL_ETH(QString data)
             if(mCommandsSent.size() > 0 && !DataIsFloating(data) && !(val.command != "[CTRL+X]" && DataIsReset(data)))
             {
                 static QString response; // Full response string
+                //qDebug() << "CMD: " << mCommandsSent.front().command;
+                //qDebug() << "R: " << data;
 
                 if((mCommandsSent.front().command != "[CTRL+X]" && DataIsEnd(data)) || (mCommandsSent.front().command == "[CTRL+X]" && DataIsReset(data)))
                 {
@@ -1253,28 +1255,35 @@ void frmMain::ProcessGRBL_ETH(QString data)
                         int num = -1;
                         if(ca.command.toUpper().contains("T"))
                         {
-                            sscanf(ca.command.toUpper().toStdString().c_str(), "T%d", &num);
+                            sscanf(ca.command.toUpper().toStdString().c_str(), "%*s T%d", &num);
+                            if(num == -1)
+                            {
+                                sscanf(ca.command.toUpper().toStdString().c_str(), "%*sT%d", &num);
+                            }
                         }
 
                         QString msg = "Confirm tool change: T";
                         msg.append(QString::number(num));
                         int ret = QMessageBox::information(this, qApp->applicationDisplayName(), (msg), QMessageBox::Ok | QMessageBox::Abort);
 
-                        QString res = "$T\r\n";
+                        char res[4] = "$T\r";
 
                         if(ret == QMessageBox::Ok)
                         {
                             if(m_Protocol == PROT_GRBL1_1)
                             {
-                                SerialIf_Write((const char*)res.constData(), res.size());
-                                SerialIf_Write("\r", 1);
+                                SerialIf_Write(res, strlen(res));
+                                //SerialIf_Write("\r", 1);
                             }
                             else if(m_Protocol == PROT_GRIP)
                             {
-                                Pdu_t p = {(uint8_t*)(res.data()), (uint16_t)res.size()};
-                                GrIP_Transmit(MSG_REALTIME_CMD, 0, &p);
+                                uint8_t ttt[3] = {'$', 'T', '\r'};
+                                Pdu_t p = {ttt, 3};
+                                GrIP_Transmit(MSG_SYSTEM_CMD, 0, &p);
+                                QThread::msleep(10);
                             }
-                            QThread::msleep(5);
+                            ca.command = "$T";
+                            mCommandsSent.push_front(ca);
                         }
 
                         m_jogVector.setZ(0.0);

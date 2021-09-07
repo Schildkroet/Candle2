@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1646</width>
-    <height>887</height>
+    <height>932</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -352,7 +352,7 @@ QSlider::handle:horizontal:hover {
             </font>
            </property>
            <property name="text">
-            <string>Handwheel</string>
+            <string>MPG</string>
            </property>
           </widget>
          </item>
@@ -3054,8 +3054,8 @@ padding-right: 8;</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>378</width>
-            <height>494</height>
+            <width>385</width>
+            <height>546</height>
            </rect>
           </property>
           <property name="sizePolicy">

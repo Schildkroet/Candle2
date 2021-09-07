@@ -728,9 +728,9 @@ void frmMain::onProcessData()
             on_cmdStop_clicked();
             return;
         }
-        sendCommand(msg);
+        sendCommand(msg, -1, false);
     }
-    if(m_transferCompleted == false)
+    if(m_transferCompleted == false && m_serialHandWheel.isOpen())
     {
         // Drop all data received while sending file
         m_serialHandWheel.clear();
@@ -792,6 +792,7 @@ void frmMain::onSendSerial()
                     Pdu_t p = {(uint8_t*)data.data(), (uint16_t)data.length()};
                     GrIP_Transmit(MSG_DATA_NO_RESPONSE, 0, &p);
                 }
+                //qDebug() << "Sent: " << command;
 
                 m_currentModel->setData(m_currentModel->index(q.tableIndex, 2), GCodeItem::Sent);
             }
