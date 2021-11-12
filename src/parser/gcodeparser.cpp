@@ -31,6 +31,7 @@ GcodeParser::GcodeParser(QObject *parent) : QObject(parent)
     m_lastSpeed = 0;
     m_lastSpindleSpeed = 0;
     m_traverseSpeed = 300;
+    m_lastDrillingDepth = qQNaN();
 
     m_currentPoint = {0, 0, 0};
 
@@ -459,8 +460,13 @@ PointSegment * GcodeParser::handleGCode(float code, const QStringList &args)
         tmp.setZ(this->m_currentPoint.z());
         addLinearPointSegment(tmp, true);
 
-        // New point at Z
+        // New point at Z depth
+        if(!std::isnan(m_lastDrillingDepth))
+        {
+            nextPoint.setZ(m_lastDrillingDepth);
+        }
         addLinearPointSegment(nextPoint, false);
+        m_lastDrillingDepth = nextPoint.z();
 
         // New point at old_z/retract
         if(!this->m_retractOldZ)
@@ -471,6 +477,14 @@ PointSegment * GcodeParser::handleGCode(float code, const QStringList &args)
     }
 
     if (code == 0.0f || code == 1.0f || code == 2.0f || code == 3.0f || code == 38.2f) this->m_lastGcodeCommand = code;
+    if (code > 80.0 && code < 84.0)
+    {
+        this->m_lastGcodeCommand = code;
+    }
+    else
+    {
+        m_lastDrillingDepth = qQNaN();
+    }
 
     return ps;
 }

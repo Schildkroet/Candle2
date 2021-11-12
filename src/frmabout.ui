@@ -58,7 +58,7 @@
      <item>
       <widget class="QLabel" name="lblAbout">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Candle 2&lt;br/&gt;Version: 2.3&lt;br/&gt;License: GNU GENERAL PUBLIC LICENSE&lt;a href=&quot;https://github.com/Schildkroet/Candle2/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;© 2015-2016 Hayrullin Denis Ravilevich&lt;br/&gt;© 2018-2021 Patrick F.&lt;/p&gt;&lt;p&gt;Visit: &lt;a href=&quot;https://github.com/Schildkroet/Candle2/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/Schildkroet/Candle2/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Candle 2&lt;br/&gt;Version: 2.4&lt;br/&gt;License: GNU GENERAL PUBLIC LICENSE&lt;a href=&quot;https://github.com/Schildkroet/Candle2/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;© 2015-2016 Hayrullin Denis Ravilevich&lt;br/&gt;© 2018-2021 Patrick F.&lt;/p&gt;&lt;p&gt;Visit: &lt;a href=&quot;https://github.com/Schildkroet/Candle2/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/Schildkroet/Candle2/&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
