@@ -1233,6 +1233,8 @@ void frmMain::on_cmdCommandSend_clicked()
     if (command.isEmpty())
         return;
 
+    command += "\n";
+
     ui->cboCommand->storeText();
     ui->cboCommand->setCurrentText("");
 
@@ -2219,6 +2221,8 @@ void frmMain::on_btnSaveCoord_clicked()
     cmd += "X" + ui->txtCoordX->text();
     cmd += "Y" + ui->txtCoordY->text();
     cmd += "Z" + ui->txtCoordZ->text();
+
+    cmd += "\n";
 
     sendCommand(cmd, -1, m_settings->showUICommands());
 }
