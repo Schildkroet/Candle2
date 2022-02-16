@@ -155,10 +155,15 @@ void frmMain::loadSettings()
     ui->cboHeightMapInterpolationType->setCurrentIndex(set.value("heightmapInterpolationType", 0).toInt());
     ui->chkHeightMapInterpolationShow->setChecked(set.value("heightmapInterpolationShow", false).toBool());
 
-    foreach (ColorPicker* pick, m_settings->colors())
-    {
-        pick->setColor(QColor(set.value(pick->objectName().mid(3), "black").toString()));
-    }
+    m_settings->setToolpathNormal(QColor(set.value("ToolpathNormal", QColor(0, 0, 0)).toString()));
+    m_settings->setToolpathDrawn(QColor(set.value("ToolpathDrawn", QColor(217, 217, 217)).toString()));
+    m_settings->setToolpathHighlight(QColor(set.value("ToolpathHighlight", QColor(145, 130, 230)).toString()));
+    m_settings->setToolpathZMovement(QColor(set.value("ToolpathZMovement", QColor(255, 0, 0)).toString()));
+    m_settings->setToolpathStart(QColor(set.value("ToolpathStart", QColor(255, 0, 0)).toString()));
+    m_settings->setToolpathEnd(QColor(set.value("ToolpathEnd", QColor(0, 255, 0)).toString()));
+    m_settings->setVisualizerBackground(QColor(set.value("VisualizerBackground", QColor(255, 255, 255)).toString()));
+    m_settings->setVisualizerText(QColor(set.value("VisualizerText", QColor(0, 0, 0)).toString()));
+    m_settings->setTool(QColor(set.value("Tool", QColor(255, 153, 0)).toString()));
 
     updateRecentFilesMenu();
 
