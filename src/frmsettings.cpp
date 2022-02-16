@@ -597,6 +597,96 @@ void frmSettings::setUseRotaryAxis(bool value)
     ui->chkEnableRotaryAxis->setChecked(value);
 }
 
+QColor frmSettings::tool()
+{
+    return ui->clpTool->color();
+}
+
+void frmSettings::setTool(const QColor& color)
+{
+    ui->clpTool->setColor(color);
+}
+
+QColor frmSettings::visualizerBackground()
+{
+    return ui->clpVisualizerBackground->color();
+}
+
+void frmSettings::setVisualizerBackground(const QColor& color)
+{
+    ui->clpVisualizerBackground->setColor(color);
+}
+
+QColor frmSettings::visualizerText()
+{
+    return ui->clpVisualizerText->color();
+}
+
+void frmSettings::setVisualizerText(const QColor& color)
+{
+    ui->clpVisualizerText->setColor(color);
+}
+
+QColor frmSettings::toolpathNormal()
+{
+    return ui->clpToolpathNormal->color();
+}
+
+void frmSettings::setToolpathNormal(const QColor& color)
+{
+    ui->clpToolpathNormal->setColor(color);
+}
+
+QColor frmSettings::toolpathDrawn()
+{
+    return ui->clpToolpathDrawn->color();
+}
+
+void frmSettings::setToolpathDrawn(const QColor& color)
+{
+    ui->clpToolpathDrawn->setColor(color);
+}
+
+QColor frmSettings::toolpathHighlight()
+{
+    return ui->clpToolpathHighlight->color();
+}
+
+void frmSettings::setToolpathHighlight(const QColor& color)
+{
+    ui->clpToolpathHighlight->setColor(color);
+}
+
+QColor frmSettings::toolpathZMovement()
+{
+    return ui->clpToolpathZMovement->color();
+}
+
+void frmSettings::setToolpathZMovement(const QColor& color)
+{
+    ui->clpToolpathZMovement->setColor(color);
+}
+
+QColor frmSettings::toolpathStart()
+{
+    return ui->clpToolpathStart->color();
+}
+
+void frmSettings::setToolpathStart(const QColor& color)
+{
+    ui->clpToolpathStart->setColor(color);
+}
+
+QColor frmSettings::toolpathEnd()
+{
+    return ui->clpToolpathEnd->color();
+}
+
+void frmSettings::setToolpathEnd(const QColor& color)
+{
+    ui->clpToolpathEnd->setColor(color);
+}
+
 void frmSettings::showEvent(QShowEvent *se)
 {
     Q_UNUSED(se)

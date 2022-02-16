@@ -125,6 +125,34 @@ public:
     bool UseRotaryAxis();
     void setUseRotaryAxis(bool value);
 
+    QColor tool();
+    void setTool(const QColor& color);
+
+    QColor visualizerBackground();
+    void setVisualizerBackground(const QColor& color);
+
+    QColor visualizerText();
+    void setVisualizerText(const QColor& color);
+
+    QColor toolpathNormal();
+    void setToolpathNormal(const QColor& color);
+
+    QColor toolpathDrawn();
+    void setToolpathDrawn(const QColor& color);
+
+    QColor toolpathHighlight();
+    void setToolpathHighlight(const QColor& color);
+
+    QColor toolpathZMovement();
+    void setToolpathZMovement(const QColor& color);
+
+    QColor toolpathStart();
+    void setToolpathStart(const QColor& color);
+
+    QColor toolpathEnd();
+    void setToolpathEnd(const QColor& color);
+
+
 protected:
     void showEvent(QShowEvent *se);
 
