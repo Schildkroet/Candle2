@@ -1,0 +1,57 @@
+name: Candle2 CI/CD
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:  
+    - name: Install QT
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2'
+        host: 'linux'
+        target: 'desktop'
+        dir: '${{ github.workspace }}/qt5/'
+        install-deps: 'true'
+        modules: 'libqt5serialport5-dev libqt5serialport5 qtwebengine'
+        archives: 'qtbase qtsvg'
+        cache: 'false'
+        cache-key-prefix: 'install-qt-action'
+        manually-cached: 'false'
+        setup-python: 'false'
+    
+    - uses: actions/checkout@v3
+    
+    - name: configure
+      run: | 
+        mkdir build && cd build
+        qmake ../src/candle2.pro
+      
+    - name: Build
+      run: make -j4
+      
+    - name: Deploy
+      run: | 
+        cd ..
+        mkdir -p AppDir/usr/bin
+        mkdir deploy && cd deploy
+        wget "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+        chmod a+x *.AppImage
+        cp ../build/Candle2 ../AppDir/usr/bin
+        ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2
+        ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2 -appimage
+        
+    
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with: 
+        name: Candle2_AppImage
+        path: |
+          Candle2*.AppImage
