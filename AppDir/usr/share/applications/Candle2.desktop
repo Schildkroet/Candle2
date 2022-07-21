@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Candle2
+Exec=Candle2
+Icon=default
+Comment=GRBL control interface in Qt
+Terminal=false
+Categories=Development;
