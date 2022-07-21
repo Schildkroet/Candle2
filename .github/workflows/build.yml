@@ -27,7 +27,7 @@ jobs:
     - name: Build
       run: |
         cd build
-        make -j4
+        make -j6
         cd ..
       
     - name: Deploy

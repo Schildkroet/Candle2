@@ -112,8 +112,16 @@ frmMain::frmMain(QWidget *parent) :
             << "G58"
             << "G59";
 
+
+    // Create settings path
+    std::string path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation).toStdString();
+    auto pos = path.rfind('/');
+    if (pos != std::string::npos) {
+        path.erase(pos);
+    }
+    m_settingsFileName = QString::fromStdString(path) + "/Candle2"  + settings_file;
+
     // Loading settings
-    m_settingsFileName = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + settings_file;
     preloadSettings();
 
     m_settings = new frmSettings(this);
