@@ -13,19 +13,8 @@ jobs:
 
     steps:  
     - name: Install QT
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '5.15.2'
-        host: 'linux'
-        target: 'desktop'
-        dir: '${{ github.workspace }}/qt5/'
-        install-deps: 'true'
-        modules: 'libqt5serialport5-dev libqt5serialport5 qtwebengine'
-        archives: 'qtbase qtsvg'
-        cache: 'false'
-        cache-key-prefix: 'install-qt-action'
-        manually-cached: 'false'
-        setup-python: 'false'
+      run: |
+        sudo apt install qt5-default qt5-qmake qtbase5-dev-tools libqt5serialport5-dev -y
     
     - uses: actions/checkout@v3
     
@@ -33,13 +22,16 @@ jobs:
       run: | 
         mkdir build && cd build
         qmake ../src/candle2.pro
+        cd ..
       
     - name: Build
-      run: make -j4
+      run: |
+        cd build
+        make -j4
+        cd ..
       
     - name: Deploy
       run: | 
-        cd ..
         mkdir -p AppDir/usr/bin
         mkdir deploy && cd deploy
         wget "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
@@ -47,6 +39,7 @@ jobs:
         cp ../build/Candle2 ../AppDir/usr/bin
         ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2
         ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2 -appimage
+        cd ..
         
     
     - name: Upload
@@ -54,4 +47,4 @@ jobs:
       with: 
         name: Candle2_AppImage
         path: |
-          Candle2*.AppImage
+          deploy/Candle2*.AppImage
