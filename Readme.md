@@ -23,11 +23,10 @@ Linux: QT 5.12.2 with GCC
 
 Downloads:
 ----------
-
-* Windows: [Candle_2.3.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.3/Candle2.3.zip)
-* Linux: [Candle_2.3_Linux.zip](https://github.com/Schildkroet/Candle2/releases/download/V2.3/Candle2.3_Linux.zip)
+* Releases (Win & Linux): [Candle 2](https://github.com/Schildkroet/Candle2/releases)
 
 
-Candle 2 GUI
+Candle 2 GUI:
+------------
 ![screenshot](/Screenshots/image1.png)
 
