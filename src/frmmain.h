@@ -109,7 +109,7 @@ typedef enum
 class CancelException : public std::exception
 {
 public:
-    const char *what() const _GLIBCXX_USE_NOEXCEPT
+    const char *what() const noexcept
     {
         return "Operation was cancelled by user";
     }
