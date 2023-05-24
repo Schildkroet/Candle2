@@ -145,10 +145,10 @@ bool frmMain::updateHeightMapGrid()
 
     m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G21G90F%1G0Z%2").
                          arg(m_settings->heightmapProbingFeed()).arg(ui->txtHeightMapGridZTop->value()));
-    m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0X0Y0"));
+    m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0X0Y0F100"));
     m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G38.2Z%1F10")
                          .arg(ui->txtHeightMapGridZBottom->value()));
-    m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0Z%1F10")
+    m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0Z%1F100")
                          .arg(ui->txtHeightMapGridZTop->value()));
 
     double x, y;
@@ -160,11 +160,11 @@ bool frmMain::updateHeightMapGrid()
         for (int j = 0; j < gridPointsX; j++)
         {
             x = borderRect.left() + gridStepX * (i % 2 ? gridPointsX - 1 - j : j);
-            m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0X%1Y%2")
+            m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0X%1Y%2F100")
                                  .arg(x, 0, 'f', 3).arg(y, 0, 'f', 3));
-            m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G38.2Z%1")
+            m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G38.2Z%1F10")
                                  .arg(ui->txtHeightMapGridZBottom->value()));
-            m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0Z%1")
+            m_probeModel.setData(m_probeModel.index(m_probeModel.rowCount() - 1, 1), QString("G0Z%1F100")
                                  .arg(ui->txtHeightMapGridZTop->value()));
         }
     }
