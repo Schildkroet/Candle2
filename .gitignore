@@ -1,0 +1,8 @@
+*.o
+ui_*
+moc_*
+.qmake.stash
+Makefile
+Candle2
+qrc_*
+settings.ini
