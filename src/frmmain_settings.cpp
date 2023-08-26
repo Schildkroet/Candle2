@@ -30,6 +30,7 @@ void frmMain::loadSettings()
     m_settingsLoading = true;
 
     m_settings->setFontSize(set.value("fontSize", 9).toInt());
+    m_settings->setLayoutCompact(set.value("layoutCompact", false).toBool());
     m_settings->setIgnoreErrors(set.value("ignoreErrors", false).toBool());
     m_settings->setAutoLine(set.value("autoLine", true).toBool());
     m_settings->setUseM6(set.value("useM6", false).toBool());
@@ -260,6 +261,7 @@ void frmMain::saveSettings()
     set.setValue("panelOverridingVisible", m_settings->panelOverriding());
     set.setValue("panelJogVisible", m_settings->panelJog());
     set.setValue("fontSize", m_settings->fontSize());
+    set.setValue("layoutCompact", m_settings->layoutCompact());
     set.setValue("consoleMinHeight", ui->grpConsole->minimumHeight());
 
     set.setValue("feedOverride", ui->slbFeedOverride->isChecked());

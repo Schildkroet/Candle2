@@ -104,6 +104,8 @@ public:
     void setPanelOverriding(bool panelFeed);
     bool panelJog();
     void setPanelJog(bool panelJog);
+    bool layoutCompact();
+    void setLayoutCompact(bool compact);
     QList<ColorPicker*> colors();
     QColor colors(QString name);
     int fontSize();
