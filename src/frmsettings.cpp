@@ -494,6 +494,16 @@ void frmSettings::setPanelJog(bool panelJog)
     ui->chkPanelJog->setChecked(panelJog);
 }
 
+bool frmSettings::layoutCompact()
+{
+    return ui->chkLayoutCompact->isChecked();
+}
+
+void frmSettings::setLayoutCompact(bool compact)
+{
+    ui->chkLayoutCompact->setChecked(compact);
+}
+
 QList<ColorPicker *> frmSettings::colors()
 {
     return this->findChildren<ColorPicker*>();
