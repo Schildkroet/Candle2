@@ -165,6 +165,10 @@ void frmMain::loadSettings()
     m_settings->setVisualizerText(QColor(set.value("VisualizerText", QColor(0, 0, 0)).toString()));
     m_settings->setTool(QColor(set.value("Tool", QColor(255, 153, 0)).toString()));
 
+    const auto interface = set.value("interface");
+    if (interface.isValid())
+        ui->comboInterface->setCurrentText(interface.toString());
+    
     updateRecentFilesMenu();
 
     ui->tblProgram->horizontalHeader()->restoreState(set.value("header", QByteArray()).toByteArray());
@@ -304,6 +308,8 @@ void frmMain::saveSettings()
         list.append(ui->cboCommand->itemText(i));
 
     set.setValue("recentCommands", list);
+
+    set.setValue("interface", ui->comboInterface->currentText());
 }
 
 bool frmMain::saveChanges(bool heightMapMode)
