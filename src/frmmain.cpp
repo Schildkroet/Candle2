@@ -356,6 +356,17 @@ frmMain::frmMain(QWidget *parent) :
     // Set isometric view
     ui->glwVisualizer->setIsometricView();
 
+    if (m_settings->layoutCompact())
+    {
+        ui->workCoordsLabel->hide();
+        ui->machineCoordslabel->hide();
+        ui->grpState->setTitle("");
+        ui->grpControl->setTitle("");
+        ui->grpJog->setTitle("");
+        ui->grpSpindle->setTitle("");
+        ui->grpHeightMap->setTitle("");
+    }
+    
     // Start timers
     m_timerSpindleUpdate.start(500);
     m_timerStateQuery.start(200);
