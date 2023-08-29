@@ -3895,7 +3895,7 @@ padding-right: 8;</string>
    </widget>
    <widget class="QMenu" name="mnuService">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="actServiceSettings"/>
    </widget>
@@ -3907,7 +3907,7 @@ padding-right: 8;</string>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
-     <string>Machine</string>
+     <string>&amp;Machine</string>
     </property>
     <addaction name="actionMachine_settings"/>
     <addaction name="actionHard_Reset"/>
@@ -3922,6 +3922,9 @@ padding-right: 8;</string>
   <action name="actFileOpen">
    <property name="text">
     <string>&amp;Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actFileExit">
@@ -3938,10 +3941,16 @@ padding-right: 8;</string>
    <property name="text">
     <string>&amp;New</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="actFileSave">
    <property name="text">
     <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actFileSaveAs">
@@ -3966,12 +3975,12 @@ padding-right: 8;</string>
   </action>
   <action name="actionMachine_settings">
    <property name="text">
-    <string>Machine settings</string>
+    <string>&amp;Machine settings</string>
    </property>
   </action>
   <action name="actionHard_Reset">
    <property name="text">
-    <string>Hard Reset</string>
+    <string>&amp;Hard Reset</string>
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Perform Hard Reset of machine control&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -3979,17 +3988,17 @@ padding-right: 8;</string>
   </action>
   <action name="actionSave_TLS_Position">
    <property name="text">
-    <string>Set TLS Position</string>
+    <string>&amp;Save TLS Position</string>
    </property>
   </action>
   <action name="actionSet_TLS_Position">
    <property name="text">
-    <string>Set TLS Position</string>
+    <string>S&amp;et TLS Position</string>
    </property>
   </action>
   <action name="actionDisable_Stepper">
    <property name="text">
-    <string>Disable Stepper</string>
+    <string>&amp;Disable Stepper</string>
    </property>
   </action>
  </widget>
