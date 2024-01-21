@@ -1743,10 +1743,12 @@ bool frmMain::DataIsFloating(QString data)
 
 bool frmMain::DataIsReset(QString data)
 {
-    //return QRegExp("^GRBL\\s\\d\\.\\d").indexIn(data.toUpper()) != -1;
-    QString g("GRBL 1.1");
-
-    return data.toUpper().contains(g);
+    // "GRBL" in either case, optionally followed by a number of non-whitespace characters,
+    // followed by a version number in the format x.y.
+    // This matches e.g.
+    // Grbl 1.1h ['$' for help]
+    // GrblHAL 1.1f ['$' or '' for help]
+    return QRegExp("^GRBL[^ ]*\\s\\d\\.\\d").indexIn(data.toUpper()) != -1;
 }
 
 QString frmMain::FeedOverride(QString command)
