@@ -94,7 +94,7 @@ public:
 
 private:
    std::list<T> mQueue;
-   std::mutex mMutex;
+   mutable std::mutex mMutex;
 };
 
 
