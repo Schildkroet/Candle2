@@ -240,6 +240,14 @@ private slots:
 
     void on_btnSaveCoord_clicked();
 
+    void on_btnClearCoord_clicked();
+
+    void on_btnCoolantFlood_clicked();
+
+    void on_btnCoolantMist_clicked();
+
+    void on_btnCoolantDisable_clicked();
+
 protected:
     void showEvent(QShowEvent *se);
     void hideEvent(QHideEvent *he);

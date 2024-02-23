@@ -61,7 +61,8 @@ frmMain::frmMain(QWidget *parent) :
              << "Door"                     // TODO: Update "Door" state
              << "Jog"
              << "Dwell"
-             << "Tool";
+             << "Tool"
+             << "Busy";
 
     m_statusCaptions << tr("Unknown")
                      << tr("Idle")
@@ -500,6 +501,7 @@ void frmMain::updateControlsState()
     ui->tabWidget->setTabEnabled(1, portOpened);
     ui->tabWidget->setTabEnabled(2, portOpened);
     ui->tabWidget->setTabEnabled(3, portOpened);
+    ui->tabWidget->setTabEnabled(4, portOpened);
 
     ui->chkTestMode->setEnabled(portOpened && !m_processingFile);
     ui->cmdHome->setEnabled(!m_processingFile);
@@ -842,22 +844,33 @@ void frmMain::onTimerUpdateSpindleParser()
 
 void frmMain::onTimerStatusQuery()
 {
-    if (SerialIf_IsOpen() && m_resetCompleted && m_statusReceived)
-    {
-        // Status report: ?
-        if(m_Protocol == PROT_GRBL1_1)
-        {
-            SerialIf_Write("?");
-        }
-        else if(m_Protocol == PROT_GRIP)
-        {
-            QByteArray data("?");
-            //GrIP_Transmit(MSG_SYSTEM_CMD, 0, (const uint8_t*)data.constData(), data.length());
-            Pdu_t p = {(uint8_t*)data.data(), (uint16_t)data.length()};
-            GrIP_Transmit(MSG_SYSTEM_CMD, 0, &p);
-        }
+    static int Timeout = 4;
 
-        m_statusReceived = false;
+    if(SerialIf_IsOpen() && m_resetCompleted)
+    {
+        if(m_statusReceived || (Timeout <= 0))
+        {
+            Timeout = 4;
+
+            // Status report: ?
+            if(m_Protocol == PROT_GRBL1_1)
+            {
+                SerialIf_Write("?");
+            }
+            else if(m_Protocol == PROT_GRIP)
+            {
+                QByteArray data("?");
+                //GrIP_Transmit(MSG_SYSTEM_CMD, 0, (const uint8_t*)data.constData(), data.length());
+                Pdu_t p = {(uint8_t*)data.data(), (uint16_t)data.length()};
+                GrIP_Transmit(MSG_SYSTEM_CMD, 0, &p);
+            }
+
+            m_statusReceived = false;
+        }
+        else
+        {
+            Timeout--;
+        }
     }
 
     ui->glwVisualizer->setBufferState(QString(tr("Buffer: %1 / %2 / %3")).arg(BufferLength()).arg(mCommandsSent.size()).arg(mCommandsWait.size()));
@@ -2248,3 +2261,27 @@ void frmMain::on_btnSaveCoord_clicked()
 
     sendCommand(cmd, -1, m_settings->showUICommands());
 }
+
+void frmMain::on_btnClearCoord_clicked()
+{
+    sendCommand("$RST=C", -1, m_settings->showUICommands());
+}
+
+
+void frmMain::on_btnCoolantFlood_clicked()
+{
+    sendCommand("M8", -1, m_settings->showUICommands());
+}
+
+
+void frmMain::on_btnCoolantMist_clicked()
+{
+    sendCommand("M7", -1, m_settings->showUICommands());
+}
+
+
+void frmMain::on_btnCoolantDisable_clicked()
+{
+    sendCommand("M9", -1, m_settings->showUICommands());
+}
+

@@ -34,7 +34,7 @@ void frmMain::ProcessGRBL1_1()
     {
         QString data = SerialIf_ReadLine().trimmed();
 
-        //qDebug() << "<" << data << ">";
+        qDebug() << "<" << data << ">";
 
         // Filter prereset responses
         if(m_reseting)
@@ -47,6 +47,11 @@ void frmMain::ProcessGRBL1_1()
                 m_reseting = false;
                 m_timerStateQuery.setInterval(m_settings->queryStateTime());
             }
+        }
+
+        if(data.length() == 0)
+        {
+            continue;
         }
 
         // Status response
@@ -868,6 +873,11 @@ void frmMain::ProcessGRBL_ETH(QString data)
                 m_reseting = false;
                 m_timerStateQuery.setInterval(m_settings->queryStateTime());
             }
+        }
+
+        if(data.length() == 0)
+        {
+            return;
         }
 
         // Status response

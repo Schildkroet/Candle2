@@ -662,7 +662,7 @@ padding-right: 8;</string>
                          <number>5</number>
                         </property>
                         <property name="maxCount">
-                         <number>10</number>
+                         <number>16</number>
                         </property>
                         <property name="insertPolicy">
                          <enum>QComboBox::InsertAtTop</enum>
@@ -757,7 +757,7 @@ padding-right: 8;</string>
                        </property>
                        <property name="minimumSize">
                         <size>
-                         <width>50</width>
+                         <width>60</width>
                          <height>0</height>
                         </size>
                        </property>
@@ -901,7 +901,7 @@ padding-right: 8;</string>
                        </property>
                        <property name="minimumSize">
                         <size>
-                         <width>50</width>
+                         <width>60</width>
                          <height>0</height>
                         </size>
                        </property>
@@ -984,7 +984,7 @@ padding-right: 8;</string>
                        </property>
                        <property name="maximumSize">
                         <size>
-                         <width>50</width>
+                         <width>56</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -1034,7 +1034,7 @@ padding-right: 8;</string>
                        </property>
                        <property name="maximumSize">
                         <size>
-                         <width>50</width>
+                         <width>56</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -1075,7 +1075,7 @@ padding-right: 8;</string>
                        </property>
                        <property name="maximumSize">
                         <size>
-                         <width>50</width>
+                         <width>56</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -1121,6 +1121,58 @@ padding-right: 8;</string>
                         <string>Set</string>
                        </property>
                       </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <spacer name="verticalSpacer_4">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Fixed</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_36">
+                     <property name="leftMargin">
+                      <number>10</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>10</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QPushButton" name="btnClearCoord">
+                       <property name="toolTip">
+                        <string>Reset all coord systems</string>
+                       </property>
+                       <property name="text">
+                        <string>Reset</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_9">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
                      </item>
                     </layout>
                    </item>
@@ -1437,6 +1489,86 @@ padding-right: 8;</string>
                   </layout>
                  </item>
                 </layout>
+               </widget>
+               <widget class="QWidget" name="tab_4">
+                <attribute name="title">
+                 <string>Misc</string>
+                </attribute>
+                <widget class="QWidget" name="verticalLayoutWidget">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>10</y>
+                   <width>581</width>
+                   <height>181</height>
+                  </rect>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_10">
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_37">
+                    <property name="leftMargin">
+                     <number>10</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>10</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="label">
+                      <property name="font">
+                       <font>
+                        <weight>75</weight>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>Coolant:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btnCoolantFlood">
+                      <property name="text">
+                       <string>Flood</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btnCoolantMist">
+                      <property name="text">
+                       <string>Mist</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btnCoolantDisable">
+                      <property name="text">
+                       <string>Disable</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_5">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
                </widget>
               </widget>
              </item>
@@ -3055,7 +3187,7 @@ padding-right: 8;</string>
             <x>0</x>
             <y>0</y>
             <width>385</width>
-            <height>546</height>
+            <height>570</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -3869,7 +4001,7 @@ padding-right: 8;</string>
      <x>0</x>
      <y>0</y>
      <width>1646</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="mnuFile">
