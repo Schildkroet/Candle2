@@ -326,6 +326,7 @@ private:
     void jogStep();
     void updateJogTitle();
 
+    QString findConfigPath();
 
     Ui::frmMain *ui;
     GcodeViewParse m_viewParser;
@@ -358,7 +359,7 @@ private:
     frmSettings *m_settings;
     frmAbout m_frmAbout;
 
-    QString m_settingsFileName;
+    QString m_settingsFilePath;
     QString m_programFileName;
     QString m_heightMapFileName;
     QString m_lastFolder;
@@ -457,9 +458,6 @@ private:
 
     // Size of internal GRBL buffer
     static const int GRBL_BUFFERLENGTH = 127;
-
-    // Name of setting file
-    const QString settings_file = "/settings.ini";
 
     QSerialPort m_serialHandWheel;
 };

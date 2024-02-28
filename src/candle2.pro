@@ -55,6 +55,7 @@ SOURCES += main.cpp\
     parser/pointsegment.cpp \
     tables/gcodetablemodel.cpp \
     tables/heightmaptablemodel.cpp \
+    utils/profiles.cpp \
     widgets/colorpicker.cpp \
     widgets/combobox.cpp \
     widgets/groupbox.cpp \
@@ -96,6 +97,7 @@ HEADERS  += frmmain.h \
     tables/gcodetablemodel.h \
     tables/heightmaptablemodel.h \
     utils/interpolation.h \
+    utils/profiles.h \
     utils/util.h \
     widgets/colorpicker.h \
     widgets/combobox.h \

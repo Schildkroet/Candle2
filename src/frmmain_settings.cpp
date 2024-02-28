@@ -24,7 +24,7 @@
 
 void frmMain::loadSettings()
 {
-    QSettings set(m_settingsFileName, QSettings::IniFormat);
+    QSettings set(m_settingsFilePath, QSettings::IniFormat);
     set.setIniCodec("UTF-8");
 
     m_settingsLoading = true;
@@ -194,7 +194,7 @@ void frmMain::loadSettings()
 
 void frmMain::saveSettings()
 {
-    QSettings set(m_settingsFileName, QSettings::IniFormat);
+    QSettings set(m_settingsFilePath, QSettings::IniFormat);
     set.setIniCodec("UTF-8");
 
     set.setValue("ipaddress", m_settings->IPAddress());
