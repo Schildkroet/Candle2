@@ -166,9 +166,7 @@ void frmMain::loadSettings()
     m_settings->setVisualizerText(QColor(set.value("VisualizerText", QColor(0, 0, 0)).toString()));
     m_settings->setTool(QColor(set.value("Tool", QColor(255, 153, 0)).toString()));
 
-    const auto interface = set.value("interface");
-    if (interface.isValid())
-        ui->comboInterface->setCurrentText(interface.toString());
+    ui->comboInterface->setCurrentText(set.value("interface", "ETHERNET").toString());
     
     updateRecentFilesMenu();
 

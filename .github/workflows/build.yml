@@ -1,4 +1,4 @@
-name: Candle2 CI/CD
+name: Candle2 Linux64
 
 on:
   push:
@@ -7,44 +7,158 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  build_linux:
 
     runs-on: ubuntu-20.04
 
+    env:
+      SOURCE_DIR:   ${{ github.workspace }}
+      QT_VERSION:   5.15.2
+      ARTIFACT:     Candle2_AppImage
+  
+    defaults:
+      run:
+        shell: bash
+
     steps:  
-    - name: Install QT
-      run: |
-        sudo apt install qt5-default qt5-qmake qtbase5-dev-tools libqt5serialport5-dev -y
-    
-    - uses: actions/checkout@v3
-    
-    - name: configure
-      run: | 
-        mkdir build && cd build
-        qmake ../src/candle2.pro
-        cd ..
+      - name: Install QT
+        run: |
+          sudo apt install qt5-default qt5-qmake qtbase5-dev-tools libqt5serialport5-dev -y
+  
+      - name: Checkout repo
+        uses: actions/checkout@v3
       
-    - name: Build
-      run: |
-        cd build
-        make -j6
-        cd ..
-      
-    - name: Deploy
-      run: | 
-        mkdir -p AppDir/usr/bin
-        mkdir deploy && cd deploy
-        wget "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-        chmod a+x *.AppImage
-        cp ../build/Candle2 ../AppDir/usr/bin
-        ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2
-        ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2 -appimage
-        cd ..
+      - name: Configure
+        run: | 
+          mkdir build && cd build
+          qmake ../src/candle2.pro
+          cd ..
         
-    
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with: 
-        name: Candle2_AppImage
-        path: |
-          deploy/Candle2*.AppImage
+      - name: Build
+        run: |
+          cd build
+          make -j6
+          cd ..
+        
+      - name: Deploy
+        run: | 
+          mkdir -p AppDir/usr/bin
+          mkdir deploy && cd deploy
+          wget "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          chmod a+x *.AppImage
+          cp ../build/Candle2 ../AppDir/usr/bin
+          ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2
+          ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2 -appimage
+          cd ..
+          
+      
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with: 
+          name: ${{ env.ARTIFACT }}
+          path: |
+            deploy/Candle2*.AppImage
+
+  build_win:
+    runs-on:  windows-2022
+
+    env:
+      SOURCE_DIR:   ${{ github.workspace }}
+      QT_VERSION:   5.15.2
+      ARTIFACT:     candle2-win.zip
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Get all tags for correct version determination
+        working-directory:  ${{ github.workspace }}
+        run: |
+          git fetch --all --tags -f
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version:      ${{ env.QT_VERSION }}
+          host:         windows
+          target:       desktop
+          arch:         win64_msvc2019_64
+          dir:          ${{ runner.temp }}  
+          setup-python: false
+
+      - name: Download JOM
+        uses: suisei-cn/actions-download-file@master
+        with:
+          url:    http://download.qt.io/official_releases/jom/jom.zip
+          target: ${{ runner.temp }}\
+
+      - name: Unzip JOM
+        working-directory: ${{ runner.temp }}
+        run:  |
+              7z x jom.zip -ojom
+              
+      - name: Create build directory
+        run:  mkdir ${{ runner.temp }}\build
+
+      - name: Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
+      - name: Build
+        working-directory: ${{ runner.temp }}\build
+        run:  |
+              qmake -r ${{ env.SOURCE_DIR }}\src\candle2.pro
+              ${{ runner.temp }}\jom\jom -j3
+              cd release
+              windeployqt --qmldir ${{ env.SOURCE_DIR }} Candle2.exe --pdb --release --compiler-runtime
+              copy C:\Windows\System32\concrt140.dll . 
+              copy C:\Windows\System32\vccorlib140.dll .
+              copy C:\Windows\System32\msvcp140.dll .
+              copy C:\Windows\System32\vcruntime140.dll .
+              
+      - name: Zip build
+        working-directory: ${{ runner.temp }}
+        run:  |
+              7z a candle2-win.zip ${{ runner.temp }}\build\* -r -x!*.h -x!*.obj -x!*.cpp -x!*.rc -x!*.stash -x!*.Debug -x!*.Release -x!Makefile
+              
+      - name: Save build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{ runner.temp }}\${{ env.ARTIFACT }}
+
+  release:
+    needs: [build_linux, build_win]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./
+
+      - name: List files
+        run: ls -R ./
+        shell: bash
+
+      - name: Update Current Release
+        uses: andelf/nightly-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: latest
+          name: "Latest Release $$"
+          draft: false
+          prerelease: true
+          body: |
+            This is the latest binary release.
+
+          files: |
+            Candle2_AppImage/Candle2*.AppImage
+            candle2-win.zip/candle2-win.zip

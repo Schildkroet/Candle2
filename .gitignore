@@ -6,3 +6,4 @@ Makefile
 Candle2
 qrc_*
 settings.ini
+build-*/
