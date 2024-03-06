@@ -33,12 +33,14 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QStandardPaths>
 #include <QThread>
+#include <QInputDialog>
 
 #include "frmmain.h"
 #include "ui_frmmain.h"
 
 #include "interface/SerialInterface.h"
 #include "GrIP/GrIP.h"
+#include "utils/profiles.h"
 
 
 static const int ReceiveTimerInterval_ms = 10;
@@ -113,14 +115,8 @@ frmMain::frmMain(QWidget *parent) :
             << "G58"
             << "G59";
 
-
-    // Create settings path
-    std::string path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation).toStdString();
-    auto pos = path.rfind('/');
-    if (pos != std::string::npos) {
-        path.erase(pos);
-    }
-    m_settingsFileName = QString::fromStdString(path) + "/Candle2"  + settings_file;
+    m_settingsFilePath = findConfigPath();
+    qDebug() << "settings file path: " << m_settingsFilePath;
 
     // Loading settings
     preloadSettings();
@@ -374,6 +370,31 @@ frmMain::frmMain(QWidget *parent) :
     m_timerSend.start(SendTimerInterval_ms);
 }
 
+QString frmMain::findConfigPath() {
+    QString profileNameFromEnvironment = getenv("CANDLE_PROFILE");
+    if (profileNameFromEnvironment.length() > 0) {
+        return configPathForProfile(profileNameFromEnvironment);
+    }
+
+    const auto profiles = getProfileNames();
+    if (profiles.length() == 0) {
+        // first run, no profiles at all yet
+        return configPathForProfile(default_profile_name);
+    } else if (profiles.length() == 1) {
+        // only one profile exists, no point asking which one
+        return configPathForProfile(profiles[0]);
+    } else {
+        bool ok;
+        const auto pickedItem = QInputDialog::getItem(this, "Choose Profile", "Choose a profile:", profiles, 0, false, &ok);
+        if (ok) {
+            return configPathForProfile(pickedItem);
+        } else {
+            // user cancelled
+            exit(0);
+        }
+    }
+}
+
 void frmMain::UpdateComPorts()
 {
     // Clear combobox
@@ -381,7 +402,7 @@ void frmMain::UpdateComPorts()
     ui->comboHandwheel->clear();
 
     // Add available ports to combobox
-    foreach (QSerialPortInfo info ,QSerialPortInfo::availablePorts())
+    foreach (QSerialPortInfo info, QSerialPortInfo::availablePorts())
     {
         ui->comboInterface->insertItem(0, info.portName());
         ui->comboHandwheel->insertItem(0, info.portName());
@@ -468,7 +489,7 @@ double frmMain::toolZPosition()
 
 void frmMain::preloadSettings()
 {
-    QSettings set(m_settingsFileName, QSettings::IniFormat);
+    QSettings set(m_settingsFilePath, QSettings::IniFormat);
     set.setIniCodec("UTF-8");
 
     qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + set.value("fontSize", "8").toString()));
