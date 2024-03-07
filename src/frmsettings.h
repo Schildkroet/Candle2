@@ -27,8 +27,8 @@ public:
     QString IPAddress();
     void setIPAddress(QString ip);
 
-    QString port();
-    void setPort(QString port);
+    unsigned int Port();
+    void setPort(unsigned int port);
     int baud();
     void setBaud(int baud);
     double toolDiameter();

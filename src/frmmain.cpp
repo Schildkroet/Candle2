@@ -2110,7 +2110,7 @@ void frmMain::on_btnConnect_clicked()
         else
         {
             // Ethernet
-            if(SerialIf_OpenEth(m_settings->IPAddress(), 30501))
+            if(SerialIf_OpenEth(m_settings->IPAddress(), m_settings->Port()))
             {
                 qDebug() << "Ethernet OK";
                 // ETH only with GrIP!

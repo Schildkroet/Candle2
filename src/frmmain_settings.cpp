@@ -96,6 +96,7 @@ void frmMain::loadSettings()
     m_storedZ = set.value("storedZ", 0).toDouble();
 
     m_settings->setIPAddress(set.value("ipaddress", "192.168.1.20").toString());
+    m_settings->setPort(set.value("ip_port", 30501).toInt());
 
     ui->cmdRestoreOrigin->setToolTip(QString(tr("Restore origin:\n%1, %2, %3")).arg(m_storedX).arg(m_storedY).arg(m_storedZ));
 
@@ -196,6 +197,7 @@ void frmMain::saveSettings()
     set.setIniCodec("UTF-8");
 
     set.setValue("ipaddress", m_settings->IPAddress());
+    set.setValue("ip_port", m_settings->Port());
     set.setValue("ignoreErrors", m_settings->ignoreErrors());
     set.setValue("autoLine", m_settings->autoLine());
     set.setValue("useM6", m_settings->UseM6());

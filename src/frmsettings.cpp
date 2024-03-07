@@ -129,6 +129,16 @@ void frmSettings::setIPAddress(QString ip)
     ui->txtIP->setText(ip);
 }
 
+unsigned int frmSettings::Port()
+{
+    return ui->txtPort->value();
+}
+
+void frmSettings::setPort(unsigned int port)
+{
+    ui->txtPort->setValue(port);
+}
+
 double frmSettings::toolDiameter()
 {
     return ui->txtToolDiameter->value();
