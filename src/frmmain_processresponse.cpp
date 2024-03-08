@@ -856,8 +856,8 @@ void frmMain::ProcessGRBL1_1()
 
 void frmMain::ProcessGRBL_ETH(QString data)
 {
-    //while(SerialIf_CanReadLine())
     {
+        // Remove CRLF
         data = data.trimmed();
 
         //qDebug() << "-- " << data << " --";

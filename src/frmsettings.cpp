@@ -617,6 +617,16 @@ void frmSettings::setUseRotaryAxis(bool value)
     ui->chkEnableRotaryAxis->setChecked(value);
 }
 
+bool frmSettings::ResetAfterConnect()
+{
+    return  ui->chkResetConnect->isChecked();
+}
+
+void frmSettings::setResetAfterConnect(bool value)
+{
+    ui->chkResetConnect->setChecked(value);
+}
+
 QColor frmSettings::tool()
 {
     return ui->clpTool->color();

@@ -126,6 +126,8 @@ public:
     void setUseM6(bool value);
     bool UseRotaryAxis();
     void setUseRotaryAxis(bool value);
+    bool ResetAfterConnect();
+    void setResetAfterConnect(bool value);
 
     QColor tool();
     void setTool(const QColor& color);

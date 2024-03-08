@@ -653,6 +653,11 @@ void frmMain::GrblReset()
 {
     qDebug() << "GRBL Reset";
 
+    if(!m_settings->ResetAfterConnect())
+    {
+        return;
+    }
+
     ui->txtConsole->clear();
 
     // Reset: 0x18

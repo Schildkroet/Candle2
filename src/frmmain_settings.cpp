@@ -35,6 +35,7 @@ void frmMain::loadSettings()
     m_settings->setAutoLine(set.value("autoLine", true).toBool());
     m_settings->setUseM6(set.value("useM6", false).toBool());
     m_settings->setUseRotaryAxis(set.value("useRotary", false).toBool());
+    m_settings->setResetAfterConnect(set.value("resetConnect", true).toBool());
     m_settings->setToolDiameter(set.value("toolDiameter", 3).toDouble());
     m_settings->setToolLength(set.value("toolLength", 15).toDouble());
     m_settings->setAntialiasing(set.value("antialiasing", true).toBool());
