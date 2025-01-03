@@ -569,7 +569,7 @@ void frmMain::ProcessGRBL1_1()
                     {
                         // Get probe Z coordinate
                         // "[PRB:0.000,0.000,0.000:0];ok"
-                        QRegExp rx(".*PRB:([^,]*),([^,]*),([^]^:]*)");
+                        QRegExp rx(".*PRB:([^,]*),([^,]*),([^,:\\]]*)");
                         double z = qQNaN();
                         if(rx.indexIn(response) != -1)
                         {
@@ -1405,7 +1405,7 @@ void frmMain::ProcessGRBL_ETH(QString data)
                     {
                         // Get probe Z coordinate
                         // "[PRB:0.000,0.000,0.000:0];ok"
-                        QRegExp rx(".*PRB:([^,]*),([^,]*),([^]^:]*)");
+                        QRegExp rx(".*PRB:([^,]*),([^,]*),([^,:\\]]*)");
                         double z = qQNaN();
                         if(rx.indexIn(response) != -1)
                         {
