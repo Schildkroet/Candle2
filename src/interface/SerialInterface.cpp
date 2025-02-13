@@ -101,6 +101,11 @@ void SerialIf_Clear()
     m_serialPort.clear();
 }
 
+bool SerialIf_SetDTR(bool state)
+{
+    return m_serialPort.setDataTerminalReady(state);
+}
+
 QString SerialIf_GetError()
 {
     if(m_Interface == IF_SERIAL)

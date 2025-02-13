@@ -25,6 +25,7 @@ void SerialIf_Close();
 bool SerialIf_IsOpen();
 
 void SerialIf_Clear();
+bool SerialIf_SetDTR(bool state);
 
 QString SerialIf_GetError();
 

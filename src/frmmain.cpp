@@ -146,7 +146,7 @@ frmMain::frmMain(QWidget *parent) :
     }
 #endif
 #ifndef UNIX
-    ui->cboCommand->setStyleSheet("QComboBox {padding: 2;} QComboBox::drop-down {width: 0; border-style: none;} QComboBox::down-arrow {image: url(noimg);	border-width: 0;}");
+    ui->cboCommand->setStyleSheet("QComboBox {padding: 2;} QComboBox::drop-down {width: 0; border-style: none;} QComboBox::down-arrow {image: url(noimg); border-width: 0;}");
 #endif
 
     m_heightMapMode = false;
@@ -2099,7 +2099,10 @@ void frmMain::on_btnConnect_clicked()
                 ui->txtStatus->setStyleSheet(QString("background-color: palette(button); color: palette(text);"));
 #ifndef WINDOWS
                 SerialIf_Clear();
+#else
+                SerialIf_SetDTR(true);
 #endif
+
                 qDebug() << "Serial OK";
 
                 m_timerRead.start(ReceiveTimerInterval_ms);
