@@ -53,7 +53,7 @@ jobs:
           
       
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with: 
           name: ${{ env.ARTIFACT }}
           path: |
@@ -128,7 +128,7 @@ jobs:
               7z a candle2-win.zip ${{ runner.temp }}\build\* -r -x!*.h -x!*.obj -x!*.cpp -x!*.rc -x!*.stash -x!*.Debug -x!*.Release -x!Makefile
               
       - name: Save build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}
           path: ${{ runner.temp }}\${{ env.ARTIFACT }}
