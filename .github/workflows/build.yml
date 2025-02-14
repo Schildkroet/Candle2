@@ -26,7 +26,7 @@ jobs:
           sudo apt install qt5-default qt5-qmake qtbase5-dev-tools libqt5serialport5-dev -y
   
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Configure
         run: | 
@@ -73,7 +73,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -139,7 +139,7 @@ jobs:
 
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ./
 
