@@ -37,6 +37,11 @@ void frmMain::on_grpJog_toggled(bool checked)
     updateLayouts();
 
     ui->widgetJog->setVisible(checked);
+    
+    // Save panel state to settings
+    if (!m_settingsLoading) {
+        saveSettings();
+    }
 }
 
 void frmMain::on_chkKeyboardControl_toggled(bool checked)
@@ -61,6 +66,7 @@ void frmMain::on_chkKeyboardControl_toggled(bool checked)
     if (!m_processingFile)
     {
         m_storedKeyboardControl = checked;
+        saveSettings();
     }
 
     updateJogTitle();

@@ -716,7 +716,10 @@ void frmMain::ProcessGRBL1_1()
 
                                 holding = false;
                                 errors.clear();
-                                if (m_senderErrorBox->checkBox()->isChecked()) m_settings->setIgnoreErrors(true);
+                                if (m_senderErrorBox->checkBox()->isChecked()) {
+                                    m_settings->setIgnoreErrors(true);
+                                    saveSettings();
+                                }
 
                                 if(result == QMessageBox::Ignore)
                                 {
@@ -1536,7 +1539,10 @@ void frmMain::ProcessGRBL_ETH(QString data)
 
                                 holding = false;
                                 errors.clear();
-                                if (m_senderErrorBox->checkBox()->isChecked()) m_settings->setIgnoreErrors(true);
+                                if (m_senderErrorBox->checkBox()->isChecked()) {
+                                    m_settings->setIgnoreErrors(true);
+                                    saveSettings();
+                                }
 
                                 if(result == QMessageBox::Ignore)
                                 {
