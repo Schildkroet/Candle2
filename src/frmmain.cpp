@@ -949,6 +949,17 @@ void frmMain::on_cmdFileSend_clicked()
         return;
     }
 
+    // Heightmap preflight
+    switch (maybePromptEnableHeightmapBeforeRun())
+    {
+        case HmEnableButDoNotRun:
+            return; // user chose to enable heightmap; do not start now
+        case HmCancel:
+            return; // user cancelled
+        case HmProceedRun:
+            break; // continue to run
+    }
+
     on_cmdFileReset_clicked();
 
     m_startTime.start();
@@ -987,6 +998,17 @@ void frmMain::onActSendFromLineTriggered()
 {
     if (m_currentModel->rowCount() == 1)
         return;
+
+    // Heightmap preflight
+    switch (maybePromptEnableHeightmapBeforeRun())
+    {
+        case HmEnableButDoNotRun:
+            return; // user chose to enable heightmap; do not start now
+        case HmCancel:
+            return; // user cancelled
+        case HmProceedRun:
+            break; // continue
+    }
 
     //Line to start from
     int commandIndex = ui->tblProgram->currentIndex().row();

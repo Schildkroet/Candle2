@@ -52,6 +52,50 @@ void frmMain::on_grpHeightMap_toggled(bool arg1)
     ui->widgetHeightMap->setVisible(arg1);
 }
 
+bool frmMain::hasHeightmapData()
+{
+    // Heightmap considered present if a heightmap file name is set or any cell contains non-NaN data
+    if (!ui->txtHeightMap->text().isEmpty()) return true;
+    for (int i = 0; i < m_heightMapModel.rowCount(); i++)
+        for (int j = 0; j < m_heightMapModel.columnCount(); j++)
+            if (!qIsNaN(m_heightMapModel.data(m_heightMapModel.index(i, j), Qt::UserRole).toDouble()))
+                return true;
+    return false;
+}
+
+frmMain::HeightmapPreflightResult frmMain::maybePromptEnableHeightmapBeforeRun()
+{
+    // Only applies when NOT in heightmap probing mode and when heightmap exists but is not enabled
+    if (m_heightMapMode) return HmProceedRun;
+    if (!hasHeightmapData()) return HmProceedRun;
+    if (ui->chkHeightMapUse->isChecked()) return HmProceedRun;
+
+    QMessageBox box(this);
+    box.setIcon(QMessageBox::Question);
+    box.setText(tr("Heightmap is available but not enabled. Apply heightmap?"));
+    box.setWindowTitle(qApp->applicationDisplayName());
+    QPushButton* yesBtn = box.addButton(tr("Yes"), QMessageBox::AcceptRole);
+    QPushButton* noBtn = box.addButton(tr("No"), QMessageBox::DestructiveRole);
+    QPushButton* cancelBtn = box.addButton(tr("Cancel"), QMessageBox::RejectRole);
+    box.setDefaultButton(yesBtn);
+    box.exec();
+
+    if (box.clickedButton() == yesBtn)
+    {
+        ui->chkHeightMapUse->setChecked(true);
+        on_chkHeightMapUse_clicked(true);
+        return HmEnableButDoNotRun;
+    }
+    else if (box.clickedButton() == noBtn)
+    {
+        return HmProceedRun;
+    }
+    else
+    {
+        return HmCancel;
+    }
+}
+
 QRectF frmMain::borderRectFromTextboxes()
 {
     QRectF rect;
