@@ -1195,6 +1195,7 @@ void frmMain::on_actServiceSettings_triggered()
 
         updateControlsState();
         applySettings();
+        saveSettings();
     }
     else
     {
@@ -1815,6 +1816,11 @@ void frmMain::on_grpOverriding_toggled(bool checked)
     updateLayouts();
 
     ui->widgetFeed->setVisible(checked);
+    
+    // Save panel state to settings
+    if (!m_settingsLoading) {
+        saveSettings();
+    }
 }
 
 void frmMain::on_grpSpindle_toggled(bool checked)
@@ -1831,11 +1837,21 @@ void frmMain::on_grpSpindle_toggled(bool checked)
     updateLayouts();
 
     ui->widgetSpindle->setVisible(checked);
+    
+    // Save panel state to settings
+    if (!m_settingsLoading) {
+        saveSettings();
+    }
 }
 
 void frmMain::on_grpUserCommands_toggled(bool checked)
 {
     ui->widgetUserCommands->setVisible(checked);
+    
+    // Save panel state to settings
+    if (!m_settingsLoading) {
+        saveSettings();
+    }
 }
 
 int frmMain::getConsoleMinHeight()

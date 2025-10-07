@@ -50,6 +50,11 @@ void frmMain::addRecentHeightmap(QString fileName)
 void frmMain::on_grpHeightMap_toggled(bool arg1)
 {
     ui->widgetHeightMap->setVisible(arg1);
+    
+    // Save panel state to settings
+    if (!m_settingsLoading) {
+        saveSettings();
+    }
 }
 
 QRectF frmMain::borderRectFromTextboxes()
