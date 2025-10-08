@@ -23,7 +23,7 @@ jobs:
     steps:  
       - name: Install QT
         run: |
-          sudo apt install qt5-qmake qtbase5-dev-tools libqt5serialport5-dev -y
+          sudo apt install qt5-qmake qtbase5-dev-tools libqt5serialport5-dev libfuse2 -y
   
       - name: Checkout repo
         uses: actions/checkout@v4
