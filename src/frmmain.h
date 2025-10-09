@@ -318,6 +318,10 @@ private:
     void restoreParserState();
     void storeOffsets();
     void restoreOffsets();
+    // Heightmap preflight: check before starting program
+    bool hasHeightmapData();
+    enum HeightmapPreflightResult { HmProceedRun, HmEnableButDoNotRun, HmCancel };
+    HeightmapPreflightResult maybePromptEnableHeightmapBeforeRun();
     bool isGCodeFile(QString fileName);
     bool isHeightmapFile(QString fileName);
     bool compareCoordinates(double x, double y, double z);
