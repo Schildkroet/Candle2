@@ -54,16 +54,21 @@ bool SerialIf_OpenEth(QString ip, qint32 port)
 
     if(m_tcpSocket.isOpen())
     {
-        // Close if already open
         m_tcpSocket.close();
     }
 
     m_ip = ip;
     m_port = port;
 
+    // connectToHost supports both IP addresses and hostnames
+    // Qt will automatically resolve the hostname if needed
     m_tcpSocket.connectToHost(ip, port);
-
     m_SocketOpen = m_tcpSocket.waitForConnected(3000);
+
+    if(!m_SocketOpen)
+    {
+        qDebug() << "[SerialIf] Connection failed:" << m_tcpSocket.errorString();
+    }
 
     return m_SocketOpen;
 }
@@ -140,13 +145,13 @@ qint64 SerialIf_Write(const QByteArray &data)
         qint64 bytes = m_tcpSocket.write(data);
         if(bytes < 0)
         {
-            qDebug() << "Error: " << m_tcpSocket.errorString();
+            qDebug() << "[SerialIf] Write ERROR:" << m_tcpSocket.errorString();
         }
         m_tcpSocket.waitForBytesWritten(4);
 
         return bytes;
     }
-    qDebug() << "Unknown interface";
+    qDebug() << "[SerialIf] ERROR: Unknown interface";
 
     return 0;
 }
@@ -179,6 +184,12 @@ qint64 SerialIf_IsDataAvailable()
     }
     else if(m_Interface == IF_ETHERNET)
     {
+        // Wait a bit for data to arrive (non-blocking check first)
+        if(m_tcpSocket.bytesAvailable() == 0)
+        {
+            m_tcpSocket.waitForReadyRead(1); // Wait 1ms for data
+        }
+
         return m_tcpSocket.bytesAvailable();
     }
 

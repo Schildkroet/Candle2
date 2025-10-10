@@ -9,6 +9,7 @@
 #include <QScrollBar>
 #include <QColorDialog>
 #include <QHostAddress>
+#include <QHostInfo>
 #include <QProcess>
 
 
@@ -32,8 +33,7 @@ frmSettings::frmSettings(QWidget *parent) :
     ui->listCategories->item(0)->setSelected(true);
     connect(ui->scrollSettings->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(onScrollBarValueChanged(int)));
 
-    // Set input mask for IP address
-    ui->txtIP->setInputMask("000.000.000.000");
+    // Allow both IP address and domain name - no input mask needed
 }
 
 frmSettings::~frmSettings()
@@ -846,33 +846,54 @@ void frmSettings::on_radGrayscaleZ_toggled(bool checked)
 
 void frmSettings::on_btnTestNetwork_clicked()
 {
-    QHostAddress ip;
+    QString hostOrIp = ui->txtIP->text().trimmed();
 
-    if(ip.setAddress(ui->txtIP->text()))
+    if(hostOrIp.isEmpty())
     {
-        //qDebug() << "IP: " << ip.toString() << " is valid";
+        QMessageBox::information(this, qApp->applicationDisplayName(), tr("Please enter an IP address or domain name!"));
+        return;
+    }
 
-        QStringList args;
-#if defined(Q_OS_LINUX)
-        args << "-c 1 -W 1";
-#elif defined(Q_OS_WIN)
-        args << "-n 1 -w 1500";
-#endif
-        args << ip.toString();
+    // Try to resolve if it's a hostname, or use directly if it's an IP
+    QHostAddress ip;
+    QString targetAddress;
 
-        int exit = QProcess::execute("ping", args);
-        if(exit == 0)
-        {
-            QMessageBox::information(this, qApp->applicationDisplayName(), tr("Connection OK!"));
-        }
-        else
-        {
-            QMessageBox::information(this, qApp->applicationDisplayName(), tr("Target not found!"));
-        }
+    if(ip.setAddress(hostOrIp))
+    {
+        // It's a valid IP address
+        targetAddress = ip.toString();
     }
     else
     {
-        qDebug() << "IP is not valid";
-        QMessageBox::information(this, qApp->applicationDisplayName(), tr("IP invalid!"));
+        // Try to resolve as hostname
+        QHostInfo hostInfo = QHostInfo::fromName(hostOrIp);
+        if(hostInfo.error() != QHostInfo::NoError || hostInfo.addresses().isEmpty())
+        {
+            QMessageBox::information(this, qApp->applicationDisplayName(),
+                tr("Unable to resolve hostname: %1").arg(hostOrIp));
+            return;
+        }
+        targetAddress = hostInfo.addresses().first().toString();
+        qDebug() << "Resolved" << hostOrIp << "to" << targetAddress;
+    }
+
+    QStringList args;
+#if defined(Q_OS_LINUX)
+    args << "-c" << "1" << "-W" << "1";
+#elif defined(Q_OS_WIN)
+    args << "-n" << "1" << "-w" << "1500";
+#elif defined(Q_OS_DARWIN)
+    args << "-c" << "1" << "-W" << "1500";
+#endif
+    args << targetAddress;
+
+    int exit = QProcess::execute("ping", args);
+    if(exit == 0)
+    {
+        QMessageBox::information(this, qApp->applicationDisplayName(), tr("Connection OK!"));
+    }
+    else
+    {
+        QMessageBox::information(this, qApp->applicationDisplayName(), tr("Target not found!"));
     }
 }

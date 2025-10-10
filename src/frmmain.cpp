@@ -126,7 +126,7 @@ frmMain::frmMain(QWidget *parent) :
 
     // Set protocols in combo box
     ui->comboProtocol->addItem(QString("GRBL 1.1"));
-    ui->comboProtocol->addItem(QString("GRBL over IP"));
+    ui->comboProtocol->addItem(QString("GrIP protocol"));
 
     // Get available Com Ports
     UpdateComPorts();
@@ -749,7 +749,9 @@ void frmMain::onProcessData()
         // GrIP
         GrIP_Update();
         if(GrIP_Receive(&dat))
+        {
             ProcessGRBL_ETH(QString(QByteArray((const char*)dat.Data, dat.RX_Header.Length)));
+        }
         break;
 
     case PROT_GRBL1_1:
@@ -2112,18 +2114,17 @@ void frmMain::on_btnConnect_clicked()
         switch (idx)
         {
         case 0:
-            qDebug() << "GRBL 1.1";
+            qDebug() << "[Connect] Using GRBL 1.1 protocol";
             m_Protocol = PROT_GRBL1_1;
             break;
 
         case 1:
-            qDebug() << "GrIP";
+            qDebug() << "[Connect] Using GrIP protocol";
             m_Protocol = PROT_GRIP;
             GrIP_Init();
             break;
 
         default:
-            qDebug() << "Default GRBL 1.1";
             m_Protocol = PROT_GRBL1_1;
             break;
         }
@@ -2157,11 +2158,21 @@ void frmMain::on_btnConnect_clicked()
         else
         {
             // Ethernet
+            qDebug() << "[Connect] Opening Ethernet" << m_settings->IPAddress() << ":" << m_settings->Port();
             if(SerialIf_OpenEth(m_settings->IPAddress(), m_settings->Port()))
             {
-                qDebug() << "Ethernet OK";
-                // ETH only with GrIP!
-                m_Protocol = PROT_GRIP;
+                // Check if user selected GrIP protocol explicitly
+                if(idx == 1)
+                {
+                    // User selected GrIP - use GrIP protocol
+                    m_Protocol = PROT_GRIP;
+                    GrIP_Init(); // Initialize GrIP protocol
+                }
+                else
+                {
+                    // Use plain GRBL over TCP (default for Ethernet)
+                    m_Protocol = PROT_GRBL1_1;
+                }
 
                 m_timerRead.start(ReceiveTimerInterval_ms);
 
@@ -2212,21 +2223,16 @@ void frmMain::on_btnConnect_clicked()
 
     this->updateControlsState();
 
-    if(ui->comboInterface->currentText() == "ETHERNET")
-    {
-        // Only GrIP
-        ui->comboProtocol->setCurrentIndex(1);
-    }
+    // No longer force protocol selection - user can choose
 }
 
 void frmMain::on_comboInterface_currentTextChanged(const QString &arg1)
 {
     if(arg1 == "ETHERNET")
     {
-        ui->comboProtocol->setEnabled(false);
-        ui->comboBaud->setEnabled(false);
-        // Only GrIP
-        ui->comboProtocol->setCurrentIndex(1);
+        // Keep protocol selector enabled - user can choose GRBL 1.1 or GrIP
+        ui->comboProtocol->setEnabled(true);
+        ui->comboBaud->setEnabled(false);  // Baud rate not needed for Ethernet
     }
     else    // Serial port
     {

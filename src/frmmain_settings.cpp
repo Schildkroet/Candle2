@@ -98,7 +98,7 @@ void frmMain::loadSettings()
     m_storedZ = set.value("storedZ", 0).toDouble();
 
     m_settings->setIPAddress(set.value("ipaddress", "192.168.1.20").toString());
-    m_settings->setPort(set.value("ip_port", 30501).toInt());
+    m_settings->setPort(set.value("ip_port", 23).toInt());
 
     ui->cmdRestoreOrigin->setToolTip(QString(tr("Restore origin:\n%1, %2, %3")).arg(m_storedX).arg(m_storedY).arg(m_storedZ));
 
