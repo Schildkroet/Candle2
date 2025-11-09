@@ -8,6 +8,7 @@ Supported functions:
 * Monitoring cnc-machine state.
 * Loading, editing, saving and sending of G-code files to CNC-Machine.
 * Visualizing G-code files.
+* Height map.
 
 System requirements for running "Candle2":
 -------------------
