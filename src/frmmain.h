@@ -7,7 +7,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QSettings>
 #include <QTimer>
-#include <QBasicTimer>
+#include <QElapsedTimer>
 #include <QStringList>
 #include <QList>
 #include <QTime>
