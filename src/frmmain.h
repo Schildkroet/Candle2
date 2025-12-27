@@ -395,7 +395,7 @@ private:
     QMenu *m_tableMenu;
     QList<CommandAttributes> m_CommandAttributesList;
     QList<CommandQueue> m_CommandQueueList;
-    QTime m_startTime;
+    QElapsedTimer m_startTime;
 
     SafeQueue<CommandQueue2> mCommandsWait;
     SafeQueue<CommandQueue2> mCommandsSent;

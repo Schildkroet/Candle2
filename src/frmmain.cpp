@@ -495,9 +495,9 @@ void frmMain::preloadSettings()
     qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + set.value("fontSize", "8").toString()));
 
     // Update v-sync in glformat
-    QGLFormat fmt = QGLFormat::defaultFormat();
+    QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
     fmt.setSwapInterval(set.value("vsync", false).toBool() ? 1 : 0);
-    QGLFormat::setDefaultFormat(fmt);
+    QSurfaceFormat::setDefaultFormat(fmt);
 }
 
 void frmMain::updateControlsState()
@@ -1232,7 +1232,7 @@ bool buttonLessThan(StyledToolButton *b1, StyledToolButton *b2)
 
 void frmMain::updateParser()
 {
-    QTime time;
+    QElapsedTimer time;
 
     qDebug() << "Updating parser:" << m_currentModel << m_currentDrawer;
     time.start();
@@ -1513,7 +1513,7 @@ void frmMain::on_cmdFileReset_clicked()
 
     if (!m_heightMapMode)
     {
-        QTime time;
+        QElapsedTimer time;
 
         time.start();
 
