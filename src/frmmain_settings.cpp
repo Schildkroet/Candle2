@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+#include <QCompleter>
 #include <QFileDialog>
 
 #include "frmmain.h"
@@ -393,7 +394,7 @@ void frmMain::applySettings()
     ui->grpOverriding->setVisible(m_settings->panelOverriding());
     ui->grpJog->setVisible(m_settings->panelJog());
 
-    ui->cboCommand->setAutoCompletion(m_settings->autoCompletion());
+    ui->cboCommand->setCompleter(m_settings->autoCompletion() ? new QCompleter(this) : nullptr);
 
     m_codeDrawer->setSimplify(m_settings->simplify());
     m_codeDrawer->setSimplifyPrecision(m_settings->simplifyPrecision());
