@@ -1878,7 +1878,8 @@ void frmMain::on_grpUserCommands_toggled(bool checked)
 
 int frmMain::getConsoleMinHeight()
 {
-    return ui->grpConsole->height() - ui->grpConsole->contentsRect().height() + ui->spacerConsole->geometry().height() + ui->grpConsole->layout()->margin() * 2 + ui->cboCommand->height();
+    QMargins grpMargins = ui->grpConsole->layout()->contentsMargins();
+    return ui->grpConsole->height() - ui->grpConsole->contentsRect().height() + ui->spacerConsole->geometry().height() + grpMargins.top() + grpMargins.bottom() + ui->cboCommand->height();
 }
 
 void frmMain::onConsoleResized(QSize size)
