@@ -280,8 +280,8 @@ private:
 
     void ProcessGRBL1_1();
     void ProcessGRBL2();
-
     void ProcessGRBL_ETH(QString data);
+    void ProcessResponse(const QString &data);
 
     double toolZPosition();
 
@@ -456,6 +456,19 @@ private:
 
     // Jog
     QVector3D m_jogVector;
+
+    // Response parsing state (replaces static locals in process functions)
+    QString m_response;
+    bool m_holdingOnError = false;
+    QString m_errorMessages;
+    double m_abortX = sNan;
+    double m_abortY = sNan;
+    double m_abortZ = sNan;
+    double m_abortA = sNan;
+    double m_abortB = sNan;
+    double m_probeFirstZ = 0.0;
+    QVector3D m_workOffset;
+    double m_workOffsetAB[2] = {0.0, 0.0};
 
     QStringList m_recentFiles;
     QStringList m_recentHeightmaps;

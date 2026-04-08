@@ -31,6 +31,7 @@
 #include <QMimeData>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+#include <QRegularExpression>
 #include <QThread>
 
 #include "frmmain.h"
@@ -284,7 +285,7 @@ void frmMain::on_cmdFileOpen_clicked()
 
         if (!fileName.isEmpty())
         {
-            m_lastFolder = fileName.left(fileName.lastIndexOf(QRegExp("[/\\\\]+")));
+            m_lastFolder = fileName.left(fileName.lastIndexOf(QRegularExpression("[/\\\\]+")));
         }
 
         if (fileName != "")

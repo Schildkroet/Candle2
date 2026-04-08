@@ -184,12 +184,6 @@ qint64 SerialIf_IsDataAvailable()
     }
     else if(m_Interface == IF_ETHERNET)
     {
-        // Wait a bit for data to arrive (non-blocking check first)
-        if(m_tcpSocket.bytesAvailable() == 0)
-        {
-            m_tcpSocket.waitForReadyRead(1); // Wait 1ms for data
-        }
-
         return m_tcpSocket.bytesAvailable();
     }
 

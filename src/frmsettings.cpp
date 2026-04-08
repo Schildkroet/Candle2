@@ -6,6 +6,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QDebug>
+#include <QRegularExpression>
 #include <QScrollBar>
 #include <QColorDialog>
 #include <QHostAddress>
@@ -817,7 +818,7 @@ void frmSettings::on_cmdDefaults_clicked()
 
 void frmSettings::on_cboFontSize_currentTextChanged(const QString &arg1)
 {
-    qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + arg1));
+    qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression("font-size:\\s*\\d+"), "font-size: " + arg1));
 }
 
 void frmSettings::on_radDrawModeVectors_toggled(bool checked)

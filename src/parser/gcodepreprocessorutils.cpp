@@ -5,7 +5,7 @@
 
 // Copyright 2015-2016 Hayrullin Denis Ravilevich
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QDebug>
 #include <QVector3D>
 #include "gcodepreprocessorutils.h"
@@ -24,12 +24,12 @@
 */
 QString GcodePreprocessorUtils::overrideSpeed(QString command, double speed, double *original)
 {
-    static QRegExp re("[Ff]([0-9.]+)");
+    static const QRegularExpression re("[Ff]([0-9.]+)");
 
-    if (re.indexIn(command) != -1) {
-        command.replace(re, QString("F%1").arg(re.cap(1).toDouble() / 100 * speed));
-
-        if (original) *original = re.cap(1).toDouble();
+    auto m = re.match(command);
+    if (m.hasMatch()) {
+        if (original) *original = m.captured(1).toDouble();
+        command.replace(re, QString("F%1").arg(m.captured(1).toDouble() / 100 * speed));
     }
 
     return command;
@@ -40,8 +40,8 @@ QString GcodePreprocessorUtils::overrideSpeed(QString command, double speed, dou
 */
 QString GcodePreprocessorUtils::removeComment(QString command)
 {
-    static QRegExp rx1("\\(+[^\\(]*\\)+");
-    static QRegExp rx2(";.*");
+    static const QRegularExpression rx1("\\(+[^(]*\\)+");
+    static const QRegularExpression rx2(";.*");
 
     // Remove any comments within ( parentheses ) using regex "\([^\(]*\)"
     if (command.contains('(')) command.remove(rx1);
@@ -61,24 +61,28 @@ QString GcodePreprocessorUtils::parseComment(QString command)
     // "(?<=\()[^\(\)]*|(?<=\;)[^;]*"
     // "(?<=\\()[^\\(\\)]*|(?<=\\;)[^;]*"
 
-    static QRegExp re("(\\([^\\(\\)]*\\)|;[^;].*)");
+    static const QRegularExpression re("(\\([^()]*\\)|;[^;].*)");
 
-    if (re.indexIn(command) != -1) {
-        return re.cap(1);
+    auto m = re.match(command);
+    if (m.hasMatch()) {
+        return m.captured(1);
     }
     return "";
 }
 
 QString GcodePreprocessorUtils::truncateDecimals(int length, QString command)
 {
-    static QRegExp re("(\\d*\\.\\d*)");
-    int pos = 0;
+    static const QRegularExpression re("(\\d*\\.\\d*)");
 
-    while ((pos = re.indexIn(command, pos)) != -1)
-    {
-        QString newNum = QString::number(re.cap(1).toDouble(), 'f', length);
-        command = command.left(pos) + newNum + command.mid(pos + re.matchedLength());
-        pos += newNum.length() + 1;
+    // Iterate matches in reverse so offsets stay valid as we replace
+    QList<QRegularExpressionMatch> matches;
+    auto it = re.globalMatch(command);
+    while (it.hasNext()) matches.append(it.next());
+
+    for (int i = matches.size() - 1; i >= 0; --i) {
+        const auto &m = matches[i];
+        QString newNum = QString::number(m.captured(1).toDouble(), 'f', length);
+        command = command.left(m.capturedStart()) + newNum + command.mid(m.capturedEnd());
     }
 
     return command;
@@ -86,7 +90,7 @@ QString GcodePreprocessorUtils::truncateDecimals(int length, QString command)
 
 QString GcodePreprocessorUtils::removeAllWhitespace(QString command)
 {
-    static QRegExp rx("\\s");
+    static const QRegularExpression rx("\\s");
 
     return command.remove(rx);
 }
@@ -104,30 +108,22 @@ QList<float> GcodePreprocessorUtils::parseCodes(const QStringList &args, char co
 
 QList<int> GcodePreprocessorUtils::parseGCodes(QString command)
 {
-    static QRegExp re("[Gg]0*(\\d+)");
+    static const QRegularExpression re("[Gg]0*(\\d+)");
 
     QList<int> codes;
-    int pos = 0;
-
-    while ((pos = re.indexIn(command, pos)) != -1) {
-        codes.append(re.cap(1).toInt());
-        pos += re.matchedLength();
-    }
+    auto it = re.globalMatch(command);
+    while (it.hasNext()) codes.append(it.next().captured(1).toInt());
 
     return codes;
 }
 
 QList<int> GcodePreprocessorUtils::parseMCodes(QString command)
 {
-    static QRegExp re("[Mm]0*(\\d+)");
+    static const QRegularExpression re("[Mm]0*(\\d+)");
 
     QList<int> codes;
-    int pos = 0;
-
-    while ((pos = re.indexIn(command, pos)) != -1) {
-        codes.append(re.cap(1).toInt());
-        pos += re.matchedLength();
-    }
+    auto it = re.globalMatch(command);
+    while (it.hasNext()) codes.append(it.next().captured(1).toInt());
 
     return codes;
 }

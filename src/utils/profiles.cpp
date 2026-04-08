@@ -1,4 +1,5 @@
 #include "profiles.h"
+#include <QRegularExpression>
 #include <QUrl>
 
 // chosen for backward compatibility with pre-profiles versions, which always stored settings in `settings.ini`
@@ -11,7 +12,7 @@ QStringList getProfileNames()
     QStringList rv;
     for (QString configFile : configFiles)
     {
-        rv << QUrl::fromPercentEncoding(configFile.replace(QRegExp("\\.ini$"), "").toUtf8());
+        rv << QUrl::fromPercentEncoding(configFile.replace(QRegularExpression("\\.ini$"), "").toUtf8());
     }
     return rv;
 }

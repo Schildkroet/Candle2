@@ -89,6 +89,7 @@ public:
 
     void clear()
     {
+        std::unique_lock<std::mutex> lock(mMutex);
         mQueue.clear();
     }
 
