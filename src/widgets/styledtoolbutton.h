@@ -12,6 +12,8 @@
 
 class StyledToolButton : public QToolButton
 {
+    Q_OBJECT
+
 public:
     explicit StyledToolButton(QWidget *parent = 0);
 

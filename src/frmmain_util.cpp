@@ -315,7 +315,7 @@ void frmMain::on_cmdFileOpen_clicked()
 
 void frmMain::loadFile(QList<QString> data)
 {
-    QTime time;
+    QElapsedTimer time;
     time.start();
 
     // Reset tables

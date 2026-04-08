@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <QtEndian>
+#include <QDebug>
 #include "../interface/SerialInterface.h"
 
 
@@ -57,6 +58,8 @@ static uint8_t GrIP_idx = 0;
 
 void GrIP_Init(void)
 {
+    qDebug() << "[GrIP] Initializing protocol version" << GRIP_VERSION;
+
     // Initialize to default values
     GrIP_Status = GRIP_IDLE;
     GrIP_idx = 0;
@@ -87,6 +90,7 @@ uint8_t GrIP_Transmit(uint8_t MsgType, uint8_t ReturnCode, Pdu_t *data)
         // Check if data fits into transmit buffer
         if(data->Length > GRIP_BUFFER_SIZE)
         {
+            qDebug() << "[GrIP TX] ERROR: Data too large:" << data->Length << ">" << GRIP_BUFFER_SIZE;
             return RET_NOK;
         }
         else if(data->Length > 0)
@@ -104,6 +108,22 @@ uint8_t GrIP_Transmit(uint8_t MsgType, uint8_t ReturnCode, Pdu_t *data)
         TX_Buffer[0] = MAGIC;
         memcpy(&TX_Buffer[1], &TX_Header, GRIP_HEADER_SIZE);
         memcpy(&TX_Buffer[1] + GRIP_HEADER_SIZE, data->Data, data->Length);
+        
+
+        // Log the transmission
+        QString msgTypeStr;
+        switch(MsgType) {
+            case MSG_SYSTEM_CMD: msgTypeStr = "SYSTEM_CMD"; break;
+            case MSG_REALTIME_CMD: msgTypeStr = "REALTIME_CMD"; break;
+            case MSG_DATA: msgTypeStr = "DATA"; break;
+            case MSG_DATA_NO_RESPONSE: msgTypeStr = "DATA_NO_RESPONSE"; break;
+            case MSG_NOTIFICATION: msgTypeStr = "NOTIFICATION"; break;
+            case MSG_RESPONSE: msgTypeStr = "RESPONSE"; break;
+            case MSG_ERROR: msgTypeStr = "ERROR"; break;
+            default: msgTypeStr = QString("UNKNOWN(%1)").arg(MsgType); break;
+        }
+        QByteArray dataStr = QByteArray((char*)data->Data, data->Length);
+        qDebug() << "[GrIP TX]" << msgTypeStr << "len:" << data->Length << "data:" << dataStr;
 
         // Transmit paket
         //SerialIf_Write(TX_Buffer, data->Length + GRIP_HEADER_SIZE + 1);
@@ -125,6 +145,8 @@ uint8_t GrIP_Transmit(uint8_t MsgType, uint8_t ReturnCode, Pdu_t *data)
         TX_Header.Length = 0;
 
         memcpy(TX_Buffer, &TX_Header, GRIP_HEADER_SIZE);
+
+        qDebug() << "[GrIP TX] Header only - MsgType:" << MsgType << "ReturnCode:" << ReturnCode;
 
         // Transmit paket
         SerialIf_Write((char*)TX_Buffer, GRIP_HEADER_SIZE);
@@ -187,6 +209,10 @@ void GrIP_Update(void)
                 // Received valid packet
                 GrIP_Status = GRIP_RX_HEADER;
             }
+            else
+            {
+                qDebug() << "[GrIP RX] Invalid magic byte:" << QString("0x%1").arg(magic, 2, 16, QChar('0'));
+            }
         }
         break;
 
@@ -211,6 +237,7 @@ void GrIP_Update(void)
             {
                 // Header is invalid
                 GrIP_Status = GRIP_IDLE;
+                qDebug() << "[GrIP RX] ERROR: Invalid header, code:" << ret;
                 printf("Wrong header: %d\n", ret);
                 break;
             }
@@ -218,6 +245,7 @@ void GrIP_Update(void)
             {
                 // Payload too big
                 GrIP_Status = GRIP_IDLE;
+                qDebug() << "[GrIP RX] ERROR: Payload too large:" << RX_Buff[GrIP_idx].RX_Header.Length;
                 printf("Payload exceeds limit: %d\n", RX_Buff[GrIP_idx].RX_Header.Length);
                 break;
             }
@@ -258,6 +286,10 @@ void GrIP_Update(void)
             {
                 RX_Buff[GrIP_idx].isValid = 1;
 
+                QByteArray dataStr = QByteArray((char*)RX_Buff[GrIP_idx].Data, RX_Buff[GrIP_idx].RX_Header.Length);
+                qDebug() << "[GrIP RX] Payload received - Length:" << RX_Buff[GrIP_idx].RX_Header.Length
+                         << "Data:" << dataStr;
+
                 if(GrIP_idx < (GRIP_RX_NUM-1))
                 {
                     GrIP_idx++;
@@ -266,6 +298,13 @@ void GrIP_Update(void)
                 {
                     GrIP_idx = 0;
                 }
+            }
+            else
+            {
+                qDebug() << "[GrIP RX] ERROR: CRC mismatch! Expected:"
+                         << QString("0x%1").arg(RX_Buff[GrIP_idx].RX_Header.CRC8, 2, 16, QChar('0'))
+                         << "Calculated:"
+                         << QString("0x%1").arg(CRC_CalculateCRC8(RX_Buff[GrIP_idx].Data, RX_Buff[GrIP_idx].RX_Header.Length), 2, 16, QChar('0'));
             }
             GrIP_Status = GRIP_IDLE;
         }

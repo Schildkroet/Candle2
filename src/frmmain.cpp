@@ -127,7 +127,7 @@ frmMain::frmMain(QWidget *parent) :
 
     // Set protocols in combo box
     ui->comboProtocol->addItem(QString("GRBL 1.1"));
-    ui->comboProtocol->addItem(QString("GRBL over IP"));
+    ui->comboProtocol->addItem(QString("GrIP protocol"));
 
     // Get available Com Ports
     UpdateComPorts();
@@ -275,7 +275,7 @@ frmMain::frmMain(QWidget *parent) :
     ui->tblProgram->setModel(&m_programModel);
     ui->tblProgram->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     connect(ui->tblProgram->verticalScrollBar(), SIGNAL(actionTriggered(int)), this, SLOT(onScroolBarAction(int)));
-    connect(ui->tblProgram->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(onTableCurrentChanged(QModelIndex,QModelIndex)));    
+    connect(ui->tblProgram->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(onTableCurrentChanged(QModelIndex,QModelIndex)));
     clearTable();
 
     // Console window handling
@@ -364,7 +364,7 @@ frmMain::frmMain(QWidget *parent) :
         ui->grpSpindle->setTitle("");
         ui->grpHeightMap->setTitle("");
     }
-    
+
     // Start timers
     m_timerSpindleUpdate.start(500);
     m_timerStateQuery.start(200);
@@ -440,7 +440,7 @@ void frmMain::UpdateComPorts()
 }
 
 frmMain::~frmMain()
-{    
+{
     saveSettings();
 
     // Close interface if still open
@@ -620,7 +620,7 @@ void frmMain::updateControlsState()
 
     ui->cmdFileSend->menu()->actions().first()->setEnabled(!ui->cmdHeightMapMode->isChecked());
 
-    m_selectionDrawer.setVisible(!ui->cmdHeightMapMode->isChecked());    
+    m_selectionDrawer.setVisible(!ui->cmdHeightMapMode->isChecked());
 }
 
 void frmMain::sendCommand(QString command, int tableIndex, bool showInConsole)
@@ -750,7 +750,9 @@ void frmMain::onProcessData()
         // GrIP
         GrIP_Update();
         if(GrIP_Receive(&dat))
+        {
             ProcessGRBL_ETH(QString(QByteArray((const char*)dat.Data, dat.RX_Header.Length)));
+        }
         break;
 
     case PROT_GRBL1_1:
@@ -1164,7 +1166,7 @@ void frmMain::on_cmdFileAbort_clicked()
 }
 
 void frmMain::storeParserState()
-{    
+{
     m_storedParserStatus = ui->glwVisualizer->parserStatus().remove(QRegExp("GC:|\\[|\\]|G[01234]\\s|M[0345]+\\s|\\sF[\\d\\.]+|\\sS[\\d\\.]+"));
 }
 
@@ -1233,7 +1235,7 @@ bool buttonLessThan(StyledToolButton *b1, StyledToolButton *b2)
 
 void frmMain::updateParser()
 {
-    QTime time;
+    QElapsedTimer time;
 
     qDebug() << "Updating parser:" << m_currentModel << m_currentDrawer;
     time.start();
@@ -1514,7 +1516,7 @@ void frmMain::on_cmdFileReset_clicked()
 
     if (!m_heightMapMode)
     {
-        QTime time;
+        QElapsedTimer time;
 
         time.start();
 
@@ -1839,7 +1841,7 @@ void frmMain::on_grpOverriding_toggled(bool checked)
     updateLayouts();
 
     ui->widgetFeed->setVisible(checked);
-    
+
     // Save panel state to settings
     if (!m_settingsLoading) {
         saveSettings();
@@ -1860,7 +1862,7 @@ void frmMain::on_grpSpindle_toggled(bool checked)
     updateLayouts();
 
     ui->widgetSpindle->setVisible(checked);
-    
+
     // Save panel state to settings
     if (!m_settingsLoading) {
         saveSettings();
@@ -1870,7 +1872,7 @@ void frmMain::on_grpSpindle_toggled(bool checked)
 void frmMain::on_grpUserCommands_toggled(bool checked)
 {
     ui->widgetUserCommands->setVisible(checked);
-    
+
     // Save panel state to settings
     if (!m_settingsLoading) {
         saveSettings();
@@ -1879,7 +1881,8 @@ void frmMain::on_grpUserCommands_toggled(bool checked)
 
 int frmMain::getConsoleMinHeight()
 {
-    return ui->grpConsole->height() - ui->grpConsole->contentsRect().height() + ui->spacerConsole->geometry().height() + ui->grpConsole->layout()->margin() * 2 + ui->cboCommand->height();
+    QMargins grpMargins = ui->grpConsole->layout()->contentsMargins();
+    return ui->grpConsole->height() - ui->grpConsole->contentsRect().height() + ui->spacerConsole->geometry().height() + grpMargins.top() + grpMargins.bottom() + ui->cboCommand->height();
 }
 
 void frmMain::onConsoleResized(QSize size)
@@ -2112,18 +2115,17 @@ void frmMain::on_btnConnect_clicked()
         switch (idx)
         {
         case 0:
-            qDebug() << "GRBL 1.1";
+            qDebug() << "[Connect] Using GRBL 1.1 protocol";
             m_Protocol = PROT_GRBL1_1;
             break;
 
         case 1:
-            qDebug() << "GrIP";
+            qDebug() << "[Connect] Using GrIP protocol";
             m_Protocol = PROT_GRIP;
             GrIP_Init();
             break;
 
         default:
-            qDebug() << "Default GRBL 1.1";
             m_Protocol = PROT_GRBL1_1;
             break;
         }
@@ -2157,11 +2159,21 @@ void frmMain::on_btnConnect_clicked()
         else
         {
             // Ethernet
+            qDebug() << "[Connect] Opening Ethernet" << m_settings->IPAddress() << ":" << m_settings->Port();
             if(SerialIf_OpenEth(m_settings->IPAddress(), m_settings->Port()))
             {
-                qDebug() << "Ethernet OK";
-                // ETH only with GrIP!
-                m_Protocol = PROT_GRIP;
+                // Check if user selected GrIP protocol explicitly
+                if(idx == 1)
+                {
+                    // User selected GrIP - use GrIP protocol
+                    m_Protocol = PROT_GRIP;
+                    GrIP_Init(); // Initialize GrIP protocol
+                }
+                else
+                {
+                    // Use plain GRBL over TCP (default for Ethernet)
+                    m_Protocol = PROT_GRBL1_1;
+                }
 
                 m_timerRead.start(ReceiveTimerInterval_ms);
 
@@ -2212,21 +2224,16 @@ void frmMain::on_btnConnect_clicked()
 
     this->updateControlsState();
 
-    if(ui->comboInterface->currentText() == "ETHERNET")
-    {
-        // Only GrIP
-        ui->comboProtocol->setCurrentIndex(1);
-    }
+    // No longer force protocol selection - user can choose
 }
 
 void frmMain::on_comboInterface_currentTextChanged(const QString &arg1)
 {
     if(arg1 == "ETHERNET")
     {
-        ui->comboProtocol->setEnabled(false);
-        ui->comboBaud->setEnabled(false);
-        // Only GrIP
-        ui->comboProtocol->setCurrentIndex(1);
+        // Keep protocol selector enabled - user can choose GRBL 1.1 or GrIP
+        ui->comboProtocol->setEnabled(true);
+        ui->comboBaud->setEnabled(false);  // Baud rate not needed for Ethernet
     }
     else    // Serial port
     {

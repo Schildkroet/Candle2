@@ -581,7 +581,7 @@ void frmMain::on_chkHeightMapUse_clicked(bool checked)
         progress.setStyleSheet("QProgressBar {text-align: center; qproperty-format: \"\"}");
 
         // Performance test
-        QTime time;
+        QElapsedTimer time;
 
         // Set current model to prevent reseting heightmap cache
         m_currentModel = &m_programHeightmapModel;

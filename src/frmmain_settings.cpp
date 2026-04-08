@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+#include <QCompleter>
 #include <QFileDialog>
 
 #include "frmmain.h"
@@ -97,7 +98,7 @@ void frmMain::loadSettings()
     m_storedZ = set.value("storedZ", 0).toDouble();
 
     m_settings->setIPAddress(set.value("ipaddress", "192.168.1.20").toString());
-    m_settings->setPort(set.value("ip_port", 30501).toInt());
+    m_settings->setPort(set.value("ip_port", 23).toInt());
 
     ui->cmdRestoreOrigin->setToolTip(QString(tr("Restore origin:\n%1, %2, %3")).arg(m_storedX).arg(m_storedY).arg(m_storedZ));
 
@@ -393,7 +394,7 @@ void frmMain::applySettings()
     ui->grpOverriding->setVisible(m_settings->panelOverriding());
     ui->grpJog->setVisible(m_settings->panelJog());
 
-    ui->cboCommand->setAutoCompletion(m_settings->autoCompletion());
+    ui->cboCommand->setCompleter(m_settings->autoCompletion() ? new QCompleter(this) : nullptr);
 
     m_codeDrawer->setSimplify(m_settings->simplify());
     m_codeDrawer->setSimplifyPrecision(m_settings->simplifyPrecision());

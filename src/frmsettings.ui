@@ -109,7 +109,7 @@ QGroupBox {
                 </font>
                </property>
                <property name="text">
-                <string>GRBL IP:</string>
+                <string>Host/IP:</string>
                </property>
               </widget>
              </item>
@@ -120,6 +120,9 @@ QGroupBox {
                  <width>160</width>
                  <height>0</height>
                 </size>
+               </property>
+               <property name="placeholderText">
+                <string>e.g. 192.168.1.20 or fluidnc.local</string>
                </property>
               </widget>
              </item>
