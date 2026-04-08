@@ -8,18 +8,9 @@
 #include <QPainter>
 #include <QEasingCurve>
 
-#ifdef GLES
-#include <GLES/gl.h>
-#endif
-
 #define ZOOMSTEP 1.1
 
-#ifdef GLES
-GLWidget::GLWidget(QWidget *parent) : QOpenGLWidget(parent), m_shaderProgram(0)
-#else
-GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent), m_shaderProgram(0)
-#endif
-
+GLWidget::GLWidget(QWidget *parent) : QOpenGLWidget(parent), m_shaderProgram(nullptr)
 {
     m_animateView = false;
     m_updatesEnabled = false;
@@ -64,9 +55,9 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent), m_shaderProgram(0)
 
 GLWidget::~GLWidget()
 {
-    if (m_shaderProgram) {
-        delete m_shaderProgram;
-    }
+    makeCurrent();
+    delete m_shaderProgram;
+    doneCurrent();
 }
 
 double GLWidget::calculateVolume(QVector3D size) {
@@ -82,7 +73,7 @@ void GLWidget::fitDrawable(ShaderDrawable *drawable)
 {
     stopViewAnimation();
 
-    if (drawable != NULL) {
+    if (drawable != nullptr) {
         updateExtremes(drawable);
 
         double a = m_ySize / 2 / 0.25 * 1.3
@@ -125,12 +116,12 @@ void GLWidget::fitDrawable(ShaderDrawable *drawable)
 
 void GLWidget::updateExtremes(ShaderDrawable *drawable)
 {
-    if (!qIsNaN(drawable->getMinimumExtremes().x())) m_xMin = drawable->getMinimumExtremes().x(); else m_xMin = 0;
-    if (!qIsNaN(drawable->getMaximumExtremes().x())) m_xMax = drawable->getMaximumExtremes().x(); else m_xMax = 0;
-    if (!qIsNaN(drawable->getMinimumExtremes().y())) m_yMin = drawable->getMinimumExtremes().y(); else m_yMin = 0;
-    if (!qIsNaN(drawable->getMaximumExtremes().y())) m_yMax = drawable->getMaximumExtremes().y(); else m_yMax = 0;
-    if (!qIsNaN(drawable->getMinimumExtremes().z())) m_zMin = drawable->getMinimumExtremes().z(); else m_zMin = 0;
-    if (!qIsNaN(drawable->getMaximumExtremes().z())) m_zMax = drawable->getMaximumExtremes().z(); else m_zMax = 0;
+    if (!qIsNaN(drawable->getViewLowerBounds().x())) m_xMin = drawable->getViewLowerBounds().x(); else m_xMin = 0;
+    if (!qIsNaN(drawable->getViewUpperBounds().x())) m_xMax = drawable->getViewUpperBounds().x(); else m_xMax = 0;
+    if (!qIsNaN(drawable->getViewLowerBounds().y())) m_yMin = drawable->getViewLowerBounds().y(); else m_yMin = 0;
+    if (!qIsNaN(drawable->getViewUpperBounds().y())) m_yMax = drawable->getViewUpperBounds().y(); else m_yMax = 0;
+    if (!qIsNaN(drawable->getViewLowerBounds().z())) m_zMin = drawable->getViewLowerBounds().z(); else m_zMin = 0;
+    if (!qIsNaN(drawable->getViewUpperBounds().z())) m_zMax = drawable->getViewUpperBounds().z(); else m_zMax = 0;
 
     m_xSize = m_xMax - m_xMin;
     m_ySize = m_yMax - m_yMin;
@@ -355,10 +346,7 @@ void GLWidget::setSpendTime(const QTime &spendTime)
 
 void GLWidget::initializeGL()
 {
-#ifndef GLES
-    // Initialize functions
     initializeOpenGLFunctions();
-#endif
 
     // Create shader program
     m_shaderProgram = new QOpenGLShaderProgram();
@@ -369,8 +357,8 @@ void GLWidget::initializeGL()
         // Compile fragment shader
         m_shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fshader.glsl");
         // Link shader pipeline
-        m_shaderProgram->link();
-        qDebug() << "shader program created";
+        if (!m_shaderProgram->link())
+            qWarning() << "Shader link error:" << m_shaderProgram->log();
     }
 }
 
@@ -412,12 +400,8 @@ void GLWidget::updateView()
     m_viewMatrix.rotate(-90, 1.0, 0.0, 0.0);
 }
 
-#ifdef GLES
-void GLWidget::paintGL() {
-#else
-void GLWidget::paintEvent(QPaintEvent *pe) {
-    Q_UNUSED(pe)
-#endif
+void GLWidget::paintGL()
+{
     QPainter painter(this);
 
     // Segment counter
@@ -434,12 +418,13 @@ void GLWidget::paintEvent(QPaintEvent *pe) {
 
     // Update settings
     if (m_antialiasing) {
-        if (m_msaa) glEnable(GL_MULTISAMPLE); else {
+        if (m_msaa) {
+            glEnable(GL_MULTISAMPLE);
+        } else {
             glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
             glEnable(GL_LINE_SMOOTH);
             glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
             glEnable(GL_POINT_SMOOTH);
-
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_BLEND);
         }
@@ -447,12 +432,11 @@ void GLWidget::paintEvent(QPaintEvent *pe) {
     if (m_zBuffer) glEnable(GL_DEPTH_TEST);
 
     if (m_shaderProgram) {
-        // Draw 3d
         m_shaderProgram->bind();
 
-        // Set modelview-projection matrix
-        m_shaderProgram->setUniformValue("mvp_matrix", m_projectionMatrix * m_viewMatrix);
-        m_shaderProgram->setUniformValue("mv_matrix", m_viewMatrix);
+        // Set projection and view matrices (model matrix set per-drawable in draw())
+        m_shaderProgram->setUniformValue("p_matrix", m_projectionMatrix);
+        m_shaderProgram->setUniformValue("v_matrix", m_viewMatrix);
 
         // Update geometries in current opengl context
         foreach (ShaderDrawable *drawable, m_shaderDrawables)
@@ -467,7 +451,8 @@ void GLWidget::paintEvent(QPaintEvent *pe) {
         m_shaderProgram->release();
     }
 
-    // Draw 2D
+    m_vertices = vertices;
+
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_MULTISAMPLE);
     glDisable(GL_LINE_SMOOTH);
@@ -477,37 +462,32 @@ void GLWidget::paintEvent(QPaintEvent *pe) {
 
     QPen pen(m_colorText);
     painter.setPen(pen);
+    QFontMetrics fm(painter.font());
 
     double x = 10;
-    double y = this->height() - 60;
+    double y = this->height() - fm.height() * 4 - 10;
 
     painter.drawText(QPoint(x, y), QString("X: %1 ... %2").arg(m_xMin, 0, 'f', 3).arg(m_xMax, 0, 'f', 3));
-    painter.drawText(QPoint(x, y + 15), QString("Y: %1 ... %2").arg(m_yMin, 0, 'f', 3).arg(m_yMax, 0, 'f', 3));
-    painter.drawText(QPoint(x, y + 30), QString("Z: %1 ... %2").arg(m_zMin, 0, 'f', 3).arg(m_zMax, 0, 'f', 3));
-    painter.drawText(QPoint(x, y + 45), QString("%1 / %2 / %3").arg(m_xSize, 0, 'f', 3).arg(m_ySize, 0, 'f', 3).arg(m_zSize, 0, 'f', 3));
-
-    QFontMetrics fm(painter.font());
+    painter.drawText(QPoint(x, y + fm.height()), QString("Y: %1 ... %2").arg(m_yMin, 0, 'f', 3).arg(m_yMax, 0, 'f', 3));
+    painter.drawText(QPoint(x, y + fm.height() * 2), QString("Z: %1 ... %2").arg(m_zMin, 0, 'f', 3).arg(m_zMax, 0, 'f', 3));
+    painter.drawText(QPoint(x, y + fm.height() * 3), QString("%1 / %2 / %3").arg(m_xSize, 0, 'f', 3).arg(m_ySize, 0, 'f', 3).arg(m_zSize, 0, 'f', 3));
 
     painter.drawText(QPoint(x, fm.height() + 10), m_parserStatus);
     painter.drawText(QPoint(x, fm.height() * 2 + 10), m_speedState);
     painter.drawText(QPoint(x, fm.height() * 3 + 10), m_pinState);
 
     QString str = QString(tr("Vertices: %1")).arg(vertices);
-    painter.drawText(QPoint(this->width() - fm.width(str) - 10, y + 30), str);
+    painter.drawText(QPoint(this->width() - fm.horizontalAdvance(str) - 10, y + fm.height() * 2), str);
     str = QString("FPS: %1").arg(m_fps);
-    painter.drawText(QPoint(this->width() - fm.width(str) - 10, y + 45), str);
+    painter.drawText(QPoint(this->width() - fm.horizontalAdvance(str) - 10, y + fm.height() * 3), str);
 
     str = m_spendTime.toString("hh:mm:ss") + " / " + m_estimatedTime.toString("hh:mm:ss");
-    painter.drawText(QPoint(this->width() - fm.width(str) - 10, y), str);
+    painter.drawText(QPoint(this->width() - fm.horizontalAdvance(str) - 10, y), str);
 
     str = m_bufferState;
-    painter.drawText(QPoint(this->width() - fm.width(str) - 10, y + 15), str);
+    painter.drawText(QPoint(this->width() - fm.horizontalAdvance(str) - 10, y + fm.height()), str);
 
     m_frames++;
-
-#ifdef GLES
-    update();
-#endif
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -545,16 +525,18 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::wheelEvent(QWheelEvent *we)
 {
-    if (m_zoom > 0.1 && we->delta() < 0) {
-        m_xPan -= ((double)we->pos().x() / width() - 0.5 + m_xPan) * (1 - 1 / ZOOMSTEP);
-        m_yPan += ((double)we->pos().y() / height() - 0.5 - m_yPan) * (1 - 1 / ZOOMSTEP);
+    int delta = we->angleDelta().y();
+
+    if (m_zoom > 0.1 && delta < 0) {
+        m_xPan -= ((double)we->position().x() / width() - 0.5 + m_xPan) * (1 - 1 / ZOOMSTEP);
+        m_yPan += ((double)we->position().y() / height() - 0.5 - m_yPan) * (1 - 1 / ZOOMSTEP);
 
         m_zoom /= ZOOMSTEP;
     }
-    else if (m_zoom < 10 && we->delta() > 0)
+    else if (m_zoom < 10 && delta > 0)
     {
-        m_xPan -= ((double)we->pos().x() / width() - 0.5 + m_xPan) * (1 - ZOOMSTEP);
-        m_yPan += ((double)we->pos().y() / height() - 0.5 - m_yPan) * (1 - ZOOMSTEP);
+        m_xPan -= ((double)we->position().x() / width() - 0.5 + m_xPan) * (1 - ZOOMSTEP);
+        m_yPan += ((double)we->position().y() / height() - 0.5 - m_yPan) * (1 - ZOOMSTEP);
 
         m_zoom *= ZOOMSTEP;
     }
@@ -567,15 +549,9 @@ void GLWidget::timerEvent(QTimerEvent *te)
 {
     if (te->timerId() == m_timerPaint.timerId()) {
         if (m_animateView) viewAnimation();
-#ifndef GLES
         if (m_updatesEnabled) update();
-#endif
     } else {
-#ifdef GLES
         QOpenGLWidget::timerEvent(te);
-#else
-        QGLWidget::timerEvent(te);
-#endif
     }
 }
 

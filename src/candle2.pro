@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       = core gui opengl serialport widgets network
+QT       = core gui serialport widgets network
 
 win32: {
     QT += winextras

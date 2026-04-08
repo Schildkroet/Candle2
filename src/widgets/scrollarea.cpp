@@ -119,10 +119,6 @@ void ScrollArea::onPressed()
 
 void ScrollArea::updateBorders()
 {
-// Performance issue on changing stylesheet
-#ifdef GLES
-    return;
-#else
     QScrollBar* bar = this->verticalScrollBar();
     bool fitted = this->geometry().height() > this->widget()->sizeHint().height();
 
@@ -131,5 +127,4 @@ void ScrollArea::updateBorders()
 
     style()->unpolish(this);
     this->ensurePolished();
-#endif
 }

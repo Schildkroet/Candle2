@@ -18,7 +18,7 @@
 */
 #include <QApplication>
 #include <QDebug>
-#include <QGLWidget>
+#include <QSurfaceFormat>
 #include <QLocale>
 #include <QTranslator>
 #include <QFile>
@@ -34,6 +34,12 @@
 
 int main(int argc, char *argv[])
 {
+    // Must be set before QApplication is constructed
+    QSurfaceFormat fmt;
+    fmt.setSamples(8);
+    fmt.setDepthBufferSize(24);
+    QSurfaceFormat::setDefaultFormat(fmt);
+
 #ifdef UNIX
     bool styleOverrided = false;
     for (int i = 0; i < argc; i++) if (QString(argv[i]).toUpper() == "-STYLE") {
@@ -43,18 +49,6 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication a(argc, argv);
-
-//    QFontDatabase::addApplicationFont(":/fonts/segoeui.ttf");
-//    QFontDatabase::addApplicationFont(":/fonts/tahoma.ttf");
-
-#ifdef GLES
-    QFontDatabase::addApplicationFont(":/fonts/Ubuntu-R.ttf");
-#endif
-
-    QGLFormat glf = QGLFormat::defaultFormat();
-    glf.setSampleBuffers(true);
-    glf.setSamples(8);
-    QGLFormat::setDefaultFormat(glf);
 
 //    QLocale::setDefault(QLocale("es"));
 
@@ -86,21 +80,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-#endif
-
-#ifdef GLES
-    a.setStyle(QStyleFactory::create("Fusion"));
-    QPalette palette;
-    palette.setColor(QPalette::Highlight, QColor(204, 204, 254));
-    palette.setColor(QPalette::HighlightedText, QColor(0, 0, 0));
-    a.setPalette(palette);
-
-    a.setStyleSheet("QWidget {font-family: \"Ubuntu\";}\
-                    QMenuBar {background-color: #303030; padding-top: 2px; padding-bottom: 2px;}\
-                    QMenuBar::item {spacing: 3px; padding: 2px 8px; background: transparent; color: white;}\
-                    QMenuBar::item:pressed {border: 1px solid #505050; border-bottom: 1px; border-top-left-radius: 3px; border-top-right-radius: 3px; background: #404040; color: white;}\
-                    QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white;}\
-                    QDialog {border: 1px solid palette(mid);}");
 #endif
 
     a.setStyleSheet(a.styleSheet() + "QWidget {font-size: 8pt}");

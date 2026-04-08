@@ -23,7 +23,8 @@ bool HeightMapInterpolationDrawer::updateData()
 
     // Prepare vertex
     VertexData vertex;
-    vertex.start = QVector3D(sNan, sNan, sNan);
+    vertex.data = QVector3D();
+    vertex.type = VertexDataTypeLine;
 
     // Calculate grid parameters
     int interpolationPointsX = m_data->at(0).count();

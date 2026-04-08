@@ -4,29 +4,21 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#ifndef GLES
-#include <QGLWidget>
-#else
 #include <QOpenGLWidget>
-#endif
-
+#include <QOpenGLFunctions>
 #include <QTimer>
 #include <QTime>
 #include "drawers/shaderdrawable.h"
 
-#ifdef GLES
-class GLWidget : public QOpenGLWidget
-#else
-class GLWidget : public QGLWidget, protected QOpenGLFunctions
-#endif
+class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 public:
-    explicit GLWidget(QWidget *parent = 0);
+    explicit GLWidget(QWidget *parent = nullptr);
     ~GLWidget();
     void addDrawable(ShaderDrawable *drawable);
     void updateExtremes(ShaderDrawable *drawable);
-    void fitDrawable(ShaderDrawable *drawable = NULL);
+    void fitDrawable(ShaderDrawable *drawable = nullptr);
     bool antialiasing() const;
     void setAntialiasing(bool antialiasing);
 
@@ -80,6 +72,15 @@ public:
     QString pinState() const;
     void setPinState(const QString &pinState);
 
+    QVector3D modelLowerBounds() const { return QVector3D(m_xMin, m_yMin, m_zMin); }
+    QVector3D modelUpperBounds() const { return QVector3D(m_xMax, m_yMax, m_zMax); }
+    QVector3D modelRanges() const { return QVector3D(m_xSize, m_ySize, m_zSize); }
+    int vertexCount() const { return m_vertices; }
+    double windowSizeWorld() const { return m_distance; }
+    const QMatrix4x4 &projectionMatrix() const { return m_projectionMatrix; }
+    const QMatrix4x4 &viewMatrix() const { return m_viewMatrix; }
+    const QList<ShaderDrawable*> &shaderDrawables() const { return m_shaderDrawables; }
+
 signals:
     void rotationChanged();
     void resized();
@@ -106,6 +107,7 @@ private:
     bool m_zBuffer;
     int m_frames = 0;
     int m_fps = 0;
+    int m_vertices = 0;
     int m_targetFps;
     int m_animationFrame;
     QTime m_spendTime;
@@ -134,21 +136,17 @@ private:
     QColor m_colorText;
 
 protected:
-    void initializeGL();
-    void resizeGL(int width, int height);
+    void initializeGL() override;
+    void resizeGL(int width, int height) override;
+    void paintGL() override;
     void updateProjection();
     void updateView();
-#ifdef GLES
-    void paintGL();
-#else
-    void paintEvent(QPaintEvent *pe);
-#endif
 
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *we);
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *we) override;
 
-    void timerEvent(QTimerEvent *);
+    void timerEvent(QTimerEvent *) override;
 };
 
 #endif // GLWIDGET_H

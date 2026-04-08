@@ -2,7 +2,7 @@
 
 SelectionDrawer::SelectionDrawer()
 {
-    m_endPosition = QVector3D(sNan, sNan, sNan);
+    m_endPosition = Util::nVector();
     m_pointSize = 6.0;
 }
 
@@ -13,7 +13,8 @@ bool SelectionDrawer::updateData()
     VertexData vertex;
     vertex.color = Util::colorToVector(m_color);
     vertex.position = m_endPosition;
-    vertex.start = QVector3D(sNan, sNan, m_pointSize);
+    vertex.data = QVector3D(m_pointSize, 0, 0);
+    vertex.type = VertexDataTypePoint;
     m_points.append(vertex);
 
     return true;

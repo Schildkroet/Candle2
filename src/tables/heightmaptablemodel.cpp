@@ -1,5 +1,5 @@
 // This file is a part of "Candle" application.
-// Copyright 2015-2016 Hayrullin Denis Ravilevich
+// Copyright 2015-2021 Hayrullin Denis Ravilevich
 
 #include "heightmaptablemodel.h"
 
@@ -10,8 +10,6 @@ HeightMapTableModel::HeightMapTableModel(QObject *parent) : QAbstractTableModel(
 
 void HeightMapTableModel::resize(int cols, int rows)
 {
-    foreach (QVector<double> row, m_data) row.clear();
-
     m_data.clear();
 
     for (int i = 0; i < rows; i++) {
@@ -27,7 +25,7 @@ QVariant HeightMapTableModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()) return QVariant();
 
-    if (index.row() >= m_data.count() || index.column() >= m_data[0].count()) return QVariant();
+    if (m_data.isEmpty() || index.row() >= m_data.count() || index.column() >= m_data[0].count()) return QVariant();
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         return QString::number(m_data[(m_data.count() - 1) - index.row()][index.column()], 'f', 3);
@@ -85,7 +83,7 @@ int HeightMapTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
 
-    return m_data[0].count();
+    return m_data.isEmpty() ? 0 : m_data[0].count();
 }
 
 QVariant HeightMapTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -98,7 +96,7 @@ QVariant HeightMapTableModel::headerData(int section, Qt::Orientation orientatio
 
 Qt::ItemFlags HeightMapTableModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid()) return NULL;
+    if (!index.isValid()) return Qt::NoItemFlags;
     return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
 }
 

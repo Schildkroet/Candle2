@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QFileDialog>
+#include <QtGui/QSurfaceFormat>
 #include <QTextStream>
 #include <QDebug>
 #include <QStringList>
@@ -417,10 +418,10 @@ void frmMain::UpdateComPorts()
     foreach (int i, QSerialPortInfo::standardBaudRates())
     {
         // Only list between 9600 to 500k
-        if(i < 9600 || i > 500000)
+        /*if(i < 9600 || i > 500000)
         {
             continue;
-        }
+        }*/
         ui->comboBaud->addItem(QString::number(i));
     }
 
@@ -494,10 +495,10 @@ void frmMain::preloadSettings()
 
     qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + set.value("fontSize", "8").toString()));
 
-    // Update v-sync in glformat
-    QGLFormat fmt = QGLFormat::defaultFormat();
+    // Update v-sync in surface format
+    QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
     fmt.setSwapInterval(set.value("vsync", false).toBool() ? 1 : 0);
-    QGLFormat::setDefaultFormat(fmt);
+    QSurfaceFormat::setDefaultFormat(fmt);
 }
 
 void frmMain::updateControlsState()

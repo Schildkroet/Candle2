@@ -102,7 +102,8 @@ void GcodeParser::reset(const QVector3D &initialPoint)
     //m_currentPoint = initialPoint;
     m_currentPoint = QVector3D(0, 0, 0);
     m_currentPlane = PointSegment::XY;
-    this->m_points.append(new PointSegment(&this->m_currentPoint, -1));
+    static const QVector3D nanAxes(qQNaN(), qQNaN(), qQNaN());
+    this->m_points.append(new PointSegment(&this->m_currentPoint, &nanAxes, -1));
 }
 
 /**
@@ -190,8 +191,10 @@ QList<PointSegment*> GcodeParser::expandArc()
     // skip first element.
     if (psi.hasNext()) psi.next();
 
+    static const QVector3D nanAxes2(qQNaN(), qQNaN(), qQNaN());
     while (psi.hasNext()) {
-        temp = new PointSegment(&psi.next(), m_commandNumber++);
+        QVector3D pt = psi.next();
+        temp = new PointSegment(&pt, &nanAxes2, m_commandNumber++);
         temp->setIsMetric(lastSegment->isMetric());
         this->m_points.append(temp);
         psl.append(temp);
@@ -268,9 +271,10 @@ PointSegment *GcodeParser::addLinearPointSegment(const QVector3D &nextPoint, boo
         zOnly = true;
     }
 
+    static const QVector3D nanAxes3(qQNaN(), qQNaN(), qQNaN());
     if(m_Angle < 0.0001 && m_Angle > -0.0001)
     {
-        ps = new PointSegment(&nextPoint, m_commandNumber++);
+        ps = new PointSegment(&nextPoint, &nanAxes3, m_commandNumber++);
 
         ps->setIsMetric(this->m_isMetric);
         ps->setIsZMovement(zOnly);
@@ -284,7 +288,7 @@ PointSegment *GcodeParser::addLinearPointSegment(const QVector3D &nextPoint, boo
     {
         QVector3D n = GcodePreprocessorUtils::rotateAxis(nextPoint, m_Angle);
 
-        ps = new PointSegment(&n, m_commandNumber++);
+        ps = new PointSegment(&n, &nanAxes3, m_commandNumber++);
 
         if(m_isRotationMove)
         {
@@ -325,7 +329,8 @@ PointSegment *GcodeParser::addLinearPointSegment(const QVector3D &nextPoint, boo
 
 PointSegment *GcodeParser::addArcPointSegment(const QVector3D &nextPoint, bool clockwise, const QStringList &args)
 {
-    PointSegment *ps = new PointSegment(&nextPoint, m_commandNumber++);
+    static const QVector3D nanAxes4(qQNaN(), qQNaN(), qQNaN());
+    PointSegment *ps = new PointSegment(&nextPoint, &nanAxes4, m_commandNumber++);
 
     QVector3D center = GcodePreprocessorUtils::updateCenterWithCommand(args, this->m_currentPoint, nextPoint, this->m_inAbsoluteIJKMode, clockwise);
     double radius = GcodePreprocessorUtils::parseCoord(args, 'R');

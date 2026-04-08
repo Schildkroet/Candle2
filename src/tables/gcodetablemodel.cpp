@@ -1,5 +1,5 @@
 // This file is a part of "Candle" application.
-// Copyright 2015-2016 Hayrullin Denis Ravilevich
+// Copyright 2015-2021 Hayrullin Denis Ravilevich
 
 #include "gcodetablemodel.h"
 
@@ -124,7 +124,7 @@ QVariant GCodeTableModel::headerData(int section, Qt::Orientation orientation, i
 
 Qt::ItemFlags GCodeTableModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid()) return NULL;
+    if (!index.isValid()) return Qt::NoItemFlags;
     if (index.column() == 1) return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
     else return QAbstractTableModel::flags(index);
 }

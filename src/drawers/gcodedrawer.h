@@ -1,13 +1,13 @@
 // This file is a part of "Candle" application.
-// Copyright 2015-2016 Hayrullin Denis Ravilevich
+// Copyright 2015-2025 Hayrullin Denis Ravilevich
 
 #ifndef GCODEDRAWER_H
 #define GCODEDRAWER_H
 
 #include <QObject>
 #include <QVector3D>
-#include "parser/linesegment.h"
-#include "parser/gcodeviewparse.h"
+#include "../parser/linesegment.h"
+#include "../parser/gcodeviewparse.h"
 #include "shaderdrawable.h"
 
 class GcodeDrawer : public QObject, public ShaderDrawable
@@ -23,9 +23,11 @@ public:
     void update(QList<int> indexes);
     bool updateData();
 
-    QVector3D getSizes();
-    QVector3D getMinimumExtremes();
-    QVector3D getMaximumExtremes();
+    QVector3D getViewLowerBounds();
+    QVector3D getViewUpperBounds();
+
+    QVector3D getModelLowerBounds();
+    QVector3D getModelUpperBounds();
 
     void setViewParser(GcodeViewParse* viewParser);
     GcodeViewParse* viewParser();        

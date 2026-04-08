@@ -17,7 +17,6 @@ bool HeightMapGridDrawer::updateData()
 
     // Prepare vertex
     VertexData vertex;
-    vertex.start = QVector3D(sNan, sNan, m_pointSize);
 
     // Calculate grid parameters
     int gridPointsX = m_model->columnCount();
@@ -31,12 +30,16 @@ bool HeightMapGridDrawer::updateData()
         for (int j = 0; j < gridPointsX; j++) {
             if (m_model == NULL || qIsNaN(m_model->data(m_model->index(i, j), Qt::UserRole).toDouble())) {
                 vertex.color = QVector3D(1.0, 0.6, 0.0);
+                vertex.data = QVector3D();
+                vertex.type = VertexDataTypeLine;
                 vertex.position = QVector3D(m_borderRect.x() + gridStepX * j, m_borderRect.y() + gridStepY * i, m_zTop);
                 m_lines.append(vertex);
                 vertex.position = QVector3D(m_borderRect.x() + gridStepX * j, m_borderRect.y() + gridStepY * i, m_zBottom);
                 m_lines.append(vertex);
             } else {
                 vertex.color = QVector3D(0.0, 0.0, 1.0);
+                vertex.data = QVector3D(m_pointSize, 0, 0);
+                vertex.type = VertexDataTypePoint;
                 vertex.position = QVector3D(m_borderRect.x() + gridStepX * j, m_borderRect.y() + gridStepY * i, m_model->data(m_model->index(i, j), Qt::UserRole).toDouble());
                 m_points.append(vertex);
             }
@@ -44,6 +47,8 @@ bool HeightMapGridDrawer::updateData()
     }
 
     // Horizontal grid lines
+    vertex.data = QVector3D();
+    vertex.type = VertexDataTypeLine;
     vertex.color = QVector3D(0.0, 0.0, 1.0);
     for (int i = 0; i < gridPointsY; i++) {
         for (int j = 1; j < gridPointsX; j++) {

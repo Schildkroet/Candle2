@@ -1,5 +1,5 @@
 // This file is a part of "Candle" application.
-// Copyright 2015-2016 Hayrullin Denis Ravilevich
+// Copyright 2015-2021 Hayrullin Denis Ravilevich
 
 #ifndef INTERPOLATION
 #define INTERPOLATION
@@ -7,7 +7,6 @@
 #include <QVector>
 #include <QRectF>
 #include <QAbstractTableModel>
-#include <cmath>
 
 class Interpolation
 {
@@ -41,8 +40,8 @@ public:
         x -= borderRect.x();
         y -= borderRect.y();
 
-        int ix = trunc(x / gridStepX);
-        int iy = trunc(y / gridStepY);
+        int ix = static_cast<int>(x / gridStepX);
+        int iy = static_cast<int>(y / gridStepY);
 
         if (ix > basePoints->columnCount() - 2) ix = basePoints->columnCount() - 2;
         if (iy > basePoints->rowCount() - 2) iy = basePoints->rowCount() - 2;
