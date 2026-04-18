@@ -1,11 +1,14 @@
-#version 130
+#version 150 core
 #define DATA_TYPE_LINE 0
 #define DATA_TYPE_DASH 1
 #define DATA_TYPE_DASH_DOT 2
 #define DATA_TYPE_POINT 3
 #define DATA_TYPE_TRIANGLE 4
 
-uniform sampler2D texture;
+// Renamed from `texture` so it doesn't shadow the GLSL 1.50 built-in
+// `texture()` function. Keeping the old name compiles on some drivers
+// (GLSL scoping lets the call resolve by signature) but fails on others.
+uniform sampler2D u_texture;
 
 in vec4 v_color;
 in vec2 v_position;
@@ -37,6 +40,6 @@ void main()
     } else if (type == DATA_TYPE_POINT) {
         fragColor = v_color;
     } else if (type == DATA_TYPE_TRIANGLE) {
-        fragColor = texture2D(texture, v_texture);
+        fragColor = texture(u_texture, v_texture);
     }
 }

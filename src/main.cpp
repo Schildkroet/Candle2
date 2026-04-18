@@ -38,6 +38,16 @@ int main(int argc, char *argv[])
     QSurfaceFormat fmt;
     fmt.setSamples(8);
     fmt.setDepthBufferSize(24);
+#ifdef Q_OS_MACOS
+    // macOS only exposes OpenGL 2.1 in the default compatibility profile.
+    // The visualizer's shaders use GLSL 1.50 features (in/out keywords, etc.)
+    // which require a 3.2+ Core context — on macOS that must be requested
+    // explicitly, or you end up with a blank visualizer and shader compile
+    // errors. Linux/Windows drivers provide 3.2+ in their compatibility
+    // profile by default, so no change needed there.
+    fmt.setVersion(3, 2);
+    fmt.setProfile(QSurfaceFormat::CoreProfile);
+#endif
     QSurfaceFormat::setDefaultFormat(fmt);
 
 #ifdef UNIX

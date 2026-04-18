@@ -170,7 +170,7 @@ void ShaderDrawable::draw(QOpenGLShaderProgram *shaderProgram)
     if (!m_triangles.isEmpty()) {
         if (m_texture) {
             m_texture->bind();
-            shaderProgram->setUniformValue("texture", 0);
+            shaderProgram->setUniformValue("u_texture", 0);
         }
         glDrawArrays(GL_TRIANGLES, 0, m_triangles.count());
     }
