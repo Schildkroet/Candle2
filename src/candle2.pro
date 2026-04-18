@@ -6,8 +6,10 @@
 
 QT       = core gui serialport widgets network
 
+greaterThan(QT_MAJOR_VERSION, 5): QT += openglwidgets
+
 win32: {
-    QT += winextras
+    lessThan(QT_MAJOR_VERSION, 6): QT += winextras
     DEFINES += WINDOWS
     QMAKE_CFLAGS += -std=c11
     QMAKE_CXXFLAGS_DEBUG += -g3 -pg -std=c++14
@@ -17,6 +19,12 @@ win32: {
 unix:!macx {
     DEFINES += UNIX #GL_GLEXT_PROTOTYPES
     QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/libs\'"
+}
+
+macx: {
+    DEFINES += MACOS
+    ICON = images/candle.icns
+    QMAKE_TARGET_BUNDLE_PREFIX = com.github.schildkroet
 }
 
 contains(QT_CONFIG, opengles.) {
@@ -127,4 +135,4 @@ RESOURCES += \
     shaders.qrc \
     images.qrc
 
-CONFIG += c++14
+CONFIG += c++17

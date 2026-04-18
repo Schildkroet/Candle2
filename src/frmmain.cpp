@@ -492,7 +492,9 @@ double frmMain::toolZPosition()
 void frmMain::preloadSettings()
 {
     QSettings set(m_settingsFilePath, QSettings::IniFormat);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     set.setIniCodec("UTF-8");
+#endif
 
     qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression("font-size:\\s*\\d+"), "font-size: " + set.value("fontSize", "8").toString()));
 

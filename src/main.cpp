@@ -50,6 +50,14 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
+#ifdef Q_OS_MACOS
+    // Candle2's stylesheets assume a light palette. macOS auto-adopts dark mode
+    // under Qt6, which breaks contrast on QLCDNumber / QLineEdit / groupboxes.
+    // Force Fusion + default (light) palette for visual parity with Linux/Windows.
+    a.setStyle(QStyleFactory::create("Fusion"));
+    a.setPalette(a.style()->standardPalette());
+#endif
+
 //    QLocale::setDefault(QLocale("es"));
 
     QString loc = QLocale().name().left(2);
