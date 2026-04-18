@@ -133,8 +133,67 @@ jobs:
           name: ${{ env.ARTIFACT }}
           path: ${{ runner.temp }}\${{ env.ARTIFACT }}
 
+  build_macos:
+    # Builds an arm64-only .app bundle on Apple Silicon. Intel Mac users need
+    # to build from source — Candle2's pre-existing CI didn't ship macOS at all,
+    # so any automated build is progress. A universal-binary step can be added
+    # later without restructuring the job.
+    runs-on: macos-latest
+
+    env:
+      SOURCE_DIR: ${{ github.workspace }}
+      ARTIFACT:   candle2-macos.zip
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Qt6
+        # Homebrew's `qt` formula is Qt 6.x. `qtserialport` is a separate Qt6
+        # module (unlike Qt5 where it was part of qt-everywhere). Both are
+        # needed to build Candle2 on macOS.
+        run: |
+          brew install qt qtserialport
+
+      - name: Configure
+        run: |
+          mkdir build && cd build
+          qmake6 ../src/candle2.pro
+
+      - name: Build
+        run: |
+          cd build
+          make -j$(sysctl -n hw.ncpu)
+
+      - name: Bundle Qt frameworks
+        # macdeployqt rewrites the .app's rpaths and copies all required Qt
+        # frameworks + plugins into Candle2.app/Contents/Frameworks so the
+        # bundle is self-contained. Without this, the app only runs on
+        # machines that already have Homebrew Qt installed.
+        run: |
+          cd build
+          "$(brew --prefix qt)/bin/macdeployqt" Candle2.app -verbose=1
+
+      - name: Zip .app
+        # Use `ditto -k` instead of `zip` so macOS extended attributes
+        # (including the ad-hoc code signature macdeployqt applies) survive
+        # the round-trip through the Actions artifact store.
+        run: |
+          cd build
+          ditto -c -k --sequesterRsrc --keepParent Candle2.app "${{ env.ARTIFACT }}"
+
+      - name: Save build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: build/${{ env.ARTIFACT }}
+
   release:
-    needs: [build_linux, build_win]
+    needs: [build_linux, build_win, build_macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -165,3 +224,4 @@ jobs:
           files: |
             Candle2_AppImage/Candle2*.AppImage
             candle2-win.zip/candle2-win.zip
+            candle2-macos.zip/candle2-macos.zip
