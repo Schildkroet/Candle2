@@ -140,10 +140,26 @@ void frmMain::loadSettings()
         m_settings->setUserCommands(i, set.value(QString("userCommands%1").arg(i)).toString());
     }
 
-    ui->cboJogStep->setItems(set.value("jogSteps").toStringList());
-    ui->cboJogStep->setCurrentIndex(ui->cboJogStep->findText(set.value("jogStep").toString()));
-    ui->cboJogFeed->setItems(set.value("jogFeeds").toStringList());
-    ui->cboJogFeed->setCurrentIndex(ui->cboJogFeed->findText(set.value("jogFeed").toString()));
+    // Jog step / feed defaults — matches Candle 1.x behavior so a fresh install
+    // (or any user whose settings.ini is missing these keys) gets a usable jog
+    // panel instead of empty combos.
+    // Qt 5.15 has an ambiguous operator= between QList<QString> and QStringList
+    // initializer-list overloads, so the default lists must be constructed
+    // explicitly rather than assigned via brace-init. Qt 6 resolved this, but
+    // we still target Qt 5.15 on Linux/Windows CI.
+    QStringList jogSteps = set.value("jogSteps").toStringList();
+    if (jogSteps.isEmpty())
+        jogSteps = QStringList{"0.01", "0.1", "1", "5", "10", "50"};
+    ui->cboJogStep->setItems(jogSteps);
+    int stepIdx = ui->cboJogStep->findText(set.value("jogStep", "1").toString());
+    ui->cboJogStep->setCurrentIndex(stepIdx >= 0 ? stepIdx : ui->cboJogStep->findText("1"));
+
+    QStringList jogFeeds = set.value("jogFeeds").toStringList();
+    if (jogFeeds.isEmpty())
+        jogFeeds = QStringList{"10", "100", "500", "1000", "2000"};
+    ui->cboJogFeed->setItems(jogFeeds);
+    int feedIdx = ui->cboJogFeed->findText(set.value("jogFeed", "100").toString());
+    ui->cboJogFeed->setCurrentIndex(feedIdx >= 0 ? feedIdx : ui->cboJogFeed->findText("100"));
 
     ui->txtHeightMapBorderX->setValue(set.value("heightmapBorderX", 0).toDouble());
     ui->txtHeightMapBorderY->setValue(set.value("heightmapBorderY", 0).toDouble());
