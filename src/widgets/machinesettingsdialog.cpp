@@ -3,6 +3,9 @@
  */
 #include "machinesettingsdialog.h"
 
+#include <algorithm>
+
+#include <QCheckBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QHeaderView>
@@ -11,33 +14,116 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRegularExpression>
+#include <QTabWidget>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 
+
+// ---------------------------------------------------------------------------
+// Static registry of known GRBL settings
+// ---------------------------------------------------------------------------
+//
+// Covers the settings shipped by GRBL 1.1 and the additional ones common to
+// GRBL-Advanced forks (same $N numbers, same semantics). Anything not listed
+// here falls back to a generic text editor on the "Other" tab using the
+// firmware's own description string — so adding new settings doesn't require
+// a code change to make them editable.
+
 namespace
 {
-    enum Column { ColN = 0, ColDescription, ColValue, ColCount };
+    using Kind  = MachineSettingsDialog::Kind;
+    using Group = MachineSettingsDialog::Group;
+
+    struct Info
+    {
+        int     n;
+        Group   group;
+        Kind    kind;
+        const char *label;
+        const char *unit;   // optional suffix shown after the label
+    };
+
+    static const Info kRegistry[] = {
+        {   0, Group::Motion,  Kind::Generic,     "Step pulse",                  "µs"       },
+        {   1, Group::Motion,  Kind::Generic,     "Step idle delay",             "ms"       },
+        {   2, Group::Invert,  Kind::BitmaskXYZ,  "Step port invert",            nullptr    },
+        {   3, Group::Invert,  Kind::BitmaskXYZ,  "Direction port invert",       nullptr    },
+        {   4, Group::Invert,  Kind::Bool,        "Step enable invert",          nullptr    },
+        {   5, Group::Invert,  Kind::Bool,        "Limit pin invert",            nullptr    },
+        {   6, Group::Invert,  Kind::Bool,        "Probe pin invert",            nullptr    },
+        {  10, Group::Report,  Kind::Generic,     "Status report mask",          nullptr    },
+        {  11, Group::Motion,  Kind::Generic,     "Junction deviation",          "mm"       },
+        {  12, Group::Motion,  Kind::Generic,     "Arc tolerance",               "mm"       },
+        {  13, Group::Report,  Kind::Bool,        "Report inches",               nullptr    },
+        {  20, Group::Limits,  Kind::Bool,        "Soft limits",                 nullptr    },
+        {  21, Group::Limits,  Kind::Bool,        "Hard limits",                 nullptr    },
+        {  22, Group::Homing,  Kind::Bool,        "Homing cycle enable",         nullptr    },
+        {  23, Group::Homing,  Kind::BitmaskXYZ,  "Homing direction invert",     nullptr    },
+        {  24, Group::Homing,  Kind::Generic,     "Homing feed",                 "mm/min"   },
+        {  25, Group::Homing,  Kind::Generic,     "Homing seek",                 "mm/min"   },
+        {  26, Group::Homing,  Kind::Generic,     "Homing debounce",             "ms"       },
+        {  27, Group::Homing,  Kind::Generic,     "Homing pull-off",             "mm"       },
+        {  30, Group::Spindle, Kind::Generic,     "Max spindle speed",           "RPM"      },
+        {  31, Group::Spindle, Kind::Generic,     "Min spindle speed",           "RPM"      },
+        {  32, Group::Spindle, Kind::Bool,        "Laser mode",                  nullptr    },
+        { 100, Group::Axes,    Kind::Generic,     "X steps per mm",              "step/mm"  },
+        { 101, Group::Axes,    Kind::Generic,     "Y steps per mm",              "step/mm"  },
+        { 102, Group::Axes,    Kind::Generic,     "Z steps per mm",              "step/mm"  },
+        { 110, Group::Axes,    Kind::Generic,     "X max rate",                  "mm/min"   },
+        { 111, Group::Axes,    Kind::Generic,     "Y max rate",                  "mm/min"   },
+        { 112, Group::Axes,    Kind::Generic,     "Z max rate",                  "mm/min"   },
+        { 120, Group::Axes,    Kind::Generic,     "X acceleration",              "mm/s²"    },
+        { 121, Group::Axes,    Kind::Generic,     "Y acceleration",              "mm/s²"    },
+        { 122, Group::Axes,    Kind::Generic,     "Z acceleration",              "mm/s²"    },
+        { 130, Group::Axes,    Kind::Generic,     "X max travel",                "mm"       },
+        { 131, Group::Axes,    Kind::Generic,     "Y max travel",                "mm"       },
+        { 132, Group::Axes,    Kind::Generic,     "Z max travel",                "mm"       },
+    };
+
+    const Info *lookup(int n)
+    {
+        for (const auto &info : kRegistry)
+            if (info.n == n) return &info;
+        return nullptr;
+    }
+
+    const char *groupTitle(Group g)
+    {
+        switch (g) {
+        case Group::Motion:  return "Motion";
+        case Group::Invert:  return "Invert";
+        case Group::Report:  return "Report";
+        case Group::Limits:  return "Limits";
+        case Group::Homing:  return "Homing";
+        case Group::Spindle: return "Spindle";
+        case Group::Axes:    return "Axes";
+        case Group::Other:   return "Other";
+        }
+        return "Other";
+    }
+
+    // Ordered list of groups — drives tab order.
+    const Group kGroupOrder[] = {
+        Group::Motion, Group::Invert, Group::Report, Group::Limits,
+        Group::Homing, Group::Spindle, Group::Axes,  Group::Other,
+    };
+
+    enum Column { ColN = 0, ColLabel, ColValue, ColCount };
 }
 
+
+// ---------------------------------------------------------------------------
+// MachineSettingsDialog
+// ---------------------------------------------------------------------------
 
 MachineSettingsDialog::MachineSettingsDialog(QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle(tr("Machine Settings"));
-    resize(560, 520);
+    resize(620, 560);
 
-    m_table = new QTableWidget(this);
-    m_table->setColumnCount(ColCount);
-    m_table->setHorizontalHeaderLabels({tr("#"), tr("Description"), tr("Value")});
-    m_table->verticalHeader()->setVisible(false);
-    m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_table->setEditTriggers(QAbstractItemView::DoubleClicked |
-                             QAbstractItemView::SelectedClicked |
-                             QAbstractItemView::EditKeyPressed |
-                             QAbstractItemView::AnyKeyPressed);
-    m_table->horizontalHeader()->setSectionResizeMode(ColDescription, QHeaderView::Stretch);
-    m_table->horizontalHeader()->setSectionResizeMode(ColN, QHeaderView::ResizeToContents);
-    m_table->horizontalHeader()->setSectionResizeMode(ColValue, QHeaderView::ResizeToContents);
+    m_tabs = new QTabWidget(this);
+    initTabs();
 
     m_lblStatus = new QLabel(this);
     m_lblStatus->setWordWrap(true);
@@ -62,18 +148,211 @@ MachineSettingsDialog::MachineSettingsDialog(QWidget *parent)
     buttons->addWidget(m_btnClose);
 
     auto *root = new QVBoxLayout(this);
-    root->addWidget(m_table);
+    root->addWidget(m_tabs);
     root->addWidget(m_lblStatus);
     root->addLayout(buttons);
 }
 
 
+void MachineSettingsDialog::initTabs()
+{
+    for (Group g : kGroupOrder)
+    {
+        auto *table = new QTableWidget(this);
+        table->setColumnCount(ColCount);
+        table->setHorizontalHeaderLabels({tr("#"), tr("Setting"), tr("Value")});
+        table->verticalHeader()->setVisible(false);
+        table->setSelectionBehavior(QAbstractItemView::SelectRows);
+        table->setEditTriggers(QAbstractItemView::NoEditTriggers); // editors are always-on widgets
+        table->horizontalHeader()->setSectionResizeMode(ColLabel, QHeaderView::Stretch);
+        table->horizontalHeader()->setSectionResizeMode(ColN,     QHeaderView::ResizeToContents);
+        table->horizontalHeader()->setSectionResizeMode(ColValue, QHeaderView::ResizeToContents);
+
+        m_tablesByGroup[g] = table;
+        m_tabs->addTab(table, tr(groupTitle(g)));
+    }
+}
+
+
 void MachineSettingsDialog::beginRefresh()
 {
+    for (auto *table : m_tablesByGroup)
+        table->setRowCount(0);
     m_rows.clear();
-    m_table->setRowCount(0);
     clearErrors();
     setStatus(tr("Querying controller…"));
+}
+
+
+void MachineSettingsDialog::populate(const QString &joinedResponse)
+{
+    // Reset all tables + rows before re-populating. We preserve the tab order
+    // and hide any tab whose group ends up empty for this controller.
+    for (auto *table : m_tablesByGroup)
+        table->setRowCount(0);
+    m_rows.clear();
+
+    static const QRegularExpression rxLine(
+        R"(^\s*\$(\d+)\s*=\s*([^\s(]+)\s*(?:\(([^)]*)\))?\s*$)");
+
+    const QStringList lines = joinedResponse.split(QRegularExpression("[;\\r\\n]"),
+                                                   Qt::SkipEmptyParts);
+
+    for (const QString &raw : lines)
+    {
+        const auto match = rxLine.match(raw.trimmed());
+        if (!match.hasMatch())
+            continue;
+
+        Row row;
+        row.n             = match.captured(1).toInt();
+        row.originalValue = match.captured(2);
+
+        const Info *info = lookup(row.n);
+        if (info)
+        {
+            row.group = info->group;
+            row.kind  = info->kind;
+            row.label = info->unit
+                ? QString("%1 (%2)").arg(info->label, info->unit)
+                : QString::fromLatin1(info->label);
+        }
+        else
+        {
+            row.group = Group::Other;
+            row.kind  = Kind::Generic;
+            row.label = match.captured(3);   // fall back to firmware's own description
+            if (row.label.isEmpty())
+                row.label = tr("Unknown");
+        }
+
+        addRowToTab(row, match.captured(1), match.captured(3));
+        m_rows.append(row);
+    }
+
+    // Hide empty tabs for a cleaner look on minimal firmwares.
+    for (int i = m_tabs->count() - 1; i >= 0; --i)
+    {
+        auto *table = qobject_cast<QTableWidget*>(m_tabs->widget(i));
+        if (table && table->rowCount() == 0)
+            m_tabs->setTabVisible(i, false);
+        else if (table)
+            m_tabs->setTabVisible(i, true);
+    }
+
+    if (m_rows.isEmpty())
+    {
+        QString raw = joinedResponse.trimmed();
+        if (raw.endsWith("; ok")) raw.chop(4);
+        if (raw.isEmpty()) raw = tr("(empty)");
+
+        setStatus(tr("No settings returned. Controller said: \"%1\".\n"
+                     "If the machine is in Alarm state, unlock with $X in the "
+                     "console (or home it), then click Refresh.").arg(raw), true);
+    }
+    else
+    {
+        setStatus(tr("Loaded %1 setting(s) across %2 tab(s). "
+                     "Edit and click Apply — only changed rows are sent.")
+                      .arg(m_rows.size())
+                      .arg(std::count_if(std::begin(kGroupOrder), std::end(kGroupOrder),
+                          [&](Group g) { return m_tablesByGroup.value(g)->rowCount() > 0; })));
+    }
+}
+
+
+void MachineSettingsDialog::addRowToTab(Row &row, const QString &nStr, const QString &fwDesc)
+{
+    auto *table = m_tablesByGroup.value(row.group);
+    if (!table)
+        return;
+
+    const int r = table->rowCount();
+    table->insertRow(r);
+
+    auto *itemN = new QTableWidgetItem(QString("$%1").arg(nStr));
+    itemN->setTextAlignment(Qt::AlignCenter);
+    itemN->setFlags(itemN->flags() & ~Qt::ItemIsEditable);
+    table->setItem(r, ColN, itemN);
+
+    auto *itemLabel = new QTableWidgetItem(row.label);
+    itemLabel->setFlags(itemLabel->flags() & ~Qt::ItemIsEditable);
+    if (!fwDesc.isEmpty() && fwDesc != row.label)
+        itemLabel->setToolTip(fwDesc);  // keep firmware's description as a hover hint
+    table->setItem(r, ColLabel, itemLabel);
+
+    // Build the editor widget appropriate for this Kind.
+    switch (row.kind) {
+    case Kind::Bool:
+    {
+        auto *cb = new QCheckBox(table);
+        cb->setChecked(row.originalValue.toInt() != 0);
+        cb->setStyleSheet("margin-left: 6px;");
+        row.checkBox = cb;
+        table->setCellWidget(r, ColValue, cb);
+        break;
+    }
+    case Kind::BitmaskXYZ:
+    {
+        const int value = row.originalValue.toInt();
+        row.preservedHighBits = value & ~0b111;   // keep bits 3+ so we don't clobber A/B on forks
+
+        auto *container = new QWidget(table);
+        auto *lay = new QHBoxLayout(container);
+        lay->setContentsMargins(4, 0, 4, 0);
+        lay->setSpacing(8);
+
+        const QStringList axes{"X", "Y", "Z"};
+        for (int i = 0; i < axes.size(); ++i)
+        {
+            auto *cb = new QCheckBox(axes.at(i), container);
+            cb->setChecked((value >> i) & 1);
+            lay->addWidget(cb);
+            row.bitChecks.append(cb);
+        }
+        lay->addStretch();
+        table->setCellWidget(r, ColValue, container);
+        break;
+    }
+    case Kind::Generic:
+    {
+        auto *edit = new QLineEdit(row.originalValue, table);
+        edit->setAlignment(Qt::AlignRight);
+        row.lineEdit = edit;
+        table->setCellWidget(r, ColValue, edit);
+        break;
+    }
+    }
+
+    table->resizeRowToContents(r);
+}
+
+
+QString MachineSettingsDialog::currentValue(const Row &r) const
+{
+    switch (r.kind) {
+    case Kind::Bool:
+        return r.checkBox && r.checkBox->isChecked() ? QStringLiteral("1") : QStringLiteral("0");
+
+    case Kind::BitmaskXYZ: {
+        int value = r.preservedHighBits;
+        for (int i = 0; i < r.bitChecks.size(); ++i)
+            if (r.bitChecks.at(i)->isChecked())
+                value |= (1 << i);
+        return QString::number(value);
+    }
+
+    case Kind::Generic:
+        return r.lineEdit ? r.lineEdit->text().trimmed() : r.originalValue;
+    }
+    return r.originalValue;
+}
+
+
+void MachineSettingsDialog::setStatus(const QString &msg, bool isError)
+{
+    m_lblStatus->setText(msg);
+    m_lblStatus->setStyleSheet(isError ? QStringLiteral("color: red;") : QString());
 }
 
 
@@ -87,81 +366,6 @@ void MachineSettingsDialog::appendError(const QString &msg)
 void MachineSettingsDialog::clearErrors()
 {
     m_accumulatedErrors.clear();
-}
-
-
-void MachineSettingsDialog::populate(const QString &joinedResponse)
-{
-    m_rows.clear();
-    m_table->setRowCount(0);
-
-    // frmMain concatenates response lines with "; ". Normalize to newlines,
-    // then pull each "$N=value (description)" off independently so stray "ok"
-    // markers and blank lines don't confuse the parser.
-    static const QRegularExpression rxLine(
-        R"(^\s*\$(\d+)\s*=\s*([^\s(]+)\s*(?:\(([^)]*)\))?\s*$)");
-
-    const QStringList lines = joinedResponse.split(QRegularExpression("[;\\r\\n]"),
-                                                   Qt::SkipEmptyParts);
-
-    for (const QString &raw : lines)
-    {
-        const auto m = rxLine.match(raw.trimmed());
-        if (!m.hasMatch())
-            continue;
-
-        Row row;
-        row.n             = m.captured(1).toInt();
-        row.originalValue = m.captured(2);
-        row.description   = m.captured(3);
-        m_rows.append(row);
-    }
-
-    m_table->setRowCount(m_rows.size());
-    for (int i = 0; i < m_rows.size(); ++i)
-    {
-        const Row &r = m_rows.at(i);
-
-        auto *itemN = new QTableWidgetItem(QString("$%1").arg(r.n));
-        itemN->setFlags(itemN->flags() & ~Qt::ItemIsEditable);
-        itemN->setTextAlignment(Qt::AlignCenter);
-
-        auto *itemDesc = new QTableWidgetItem(r.description);
-        itemDesc->setFlags(itemDesc->flags() & ~Qt::ItemIsEditable);
-
-        auto *itemValue = new QTableWidgetItem(r.originalValue);
-        itemValue->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-
-        m_table->setItem(i, ColN,           itemN);
-        m_table->setItem(i, ColDescription, itemDesc);
-        m_table->setItem(i, ColValue,       itemValue);
-    }
-
-    if (m_rows.isEmpty())
-    {
-        // Nothing parsed. Either the controller isn't a `$$`-compatible GRBL,
-        // or it rejected the query (typical cause: ALARM state — the firmware
-        // silently drops $$ until cleared via $X).
-        QString raw = joinedResponse.trimmed();
-        if (raw.endsWith("; ok")) raw.chop(4);
-        if (raw.isEmpty()) raw = tr("(empty)");
-
-        setStatus(tr("No settings returned. Controller said: \"%1\".\n"
-                     "If the machine is in Alarm state, unlock with $X in the "
-                     "console (or home it), then click Refresh.").arg(raw), true);
-    }
-    else
-    {
-        setStatus(tr("Loaded %1 setting(s). Edit the Value column, then click Apply.")
-                      .arg(m_rows.size()));
-    }
-}
-
-
-void MachineSettingsDialog::setStatus(const QString &msg, bool isError)
-{
-    m_lblStatus->setText(msg);
-    m_lblStatus->setStyleSheet(isError ? QStringLiteral("color: red;") : QString());
 }
 
 
@@ -180,19 +384,19 @@ void MachineSettingsDialog::onApplyClicked()
     }
 
     QList<QPair<int, QString>> changes;
-    for (int i = 0; i < m_rows.size(); ++i)
+    for (const Row &r : std::as_const(m_rows))
     {
-        const QString current = m_table->item(i, ColValue)->text().trimmed();
-        if (current == m_rows.at(i).originalValue)
+        const QString current = currentValue(r);
+        if (current == r.originalValue)
             continue;
 
         if (current.isEmpty())
         {
-            setStatus(tr("$%1 has an empty value — fix or Refresh to revert.").arg(m_rows.at(i).n), true);
+            setStatus(tr("$%1 has an empty value — fix or Refresh to revert.").arg(r.n), true);
             return;
         }
 
-        changes.append({m_rows.at(i).n, current});
+        changes.append({r.n, current});
     }
 
     if (changes.isEmpty())
