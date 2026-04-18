@@ -86,6 +86,16 @@ QTableView {
 	selection-color: rgb(0, 0, 0);
 }
 
+/* QLCDNumber (work coordinate displays) — force a high-contrast color pair
+   because the default palette-derived segment color is nearly indistinguishable
+   from the widget background on macOS Fusion.
+*/
+QLCDNumber {
+	background-color: #f4f4f4;
+	color: #111111;
+	border: 1px solid #999999;
+}
+
 QSlider::horizontal {
 	padding-top: 1px;
 	padding-bottom: 1px;
