@@ -36,6 +36,7 @@
 
 #include "widgets/styledtoolbutton.h"
 #include "widgets/sliderbox.h"
+#include "widgets/machinesettingsdialog.h"
 
 #include "frmsettings.h"
 #include "frmabout.h"
@@ -61,6 +62,12 @@
 #define PROGRESSMINLINES    10000
 
 #define PROGRESSSTEP        1000
+
+// Sentinel tableIndex values for sendCommand() — the response handler uses
+// these to route GRBL replies back to their originators. Negative values
+// are reserved for UI-initiated commands (real file rows are >= 0).
+#define TI_MACHINE_SETTINGS_QUERY   (-10)
+#define TI_MACHINE_SETTINGS_WRITE   (-11)
 
 
 #ifdef WINDOWS
@@ -234,6 +241,12 @@ private slots:
 
     void on_actionDisable_Stepper_triggered();
 
+    void on_actionMachine_settings_triggered();
+
+    void onMachineSettingsApply(const QList<QPair<int, QString>> &changes);
+    void onMachineSettingsRestoreDefaults();
+    void onMachineSettingsRefresh();
+
     void on_btnHandwheel_clicked();
 
     void on_btnSetCoord_clicked();
@@ -362,6 +375,7 @@ private:
 
     frmSettings *m_settings;
     frmAbout m_frmAbout;
+    MachineSettingsDialog *m_frmMachineSettings;
 
     QString m_settingsFilePath;
     QString m_programFileName;

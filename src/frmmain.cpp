@@ -124,6 +124,14 @@ frmMain::frmMain(QWidget *parent) :
     preloadSettings();
 
     m_settings = new frmSettings(this);
+    m_frmMachineSettings = new MachineSettingsDialog(this);
+    connect(m_frmMachineSettings, &MachineSettingsDialog::refreshRequested,
+            this, &frmMain::onMachineSettingsRefresh);
+    connect(m_frmMachineSettings, &MachineSettingsDialog::applyRequested,
+            this, &frmMain::onMachineSettingsApply);
+    connect(m_frmMachineSettings, &MachineSettingsDialog::restoreDefaultsRequested,
+            this, &frmMain::onMachineSettingsRestoreDefaults);
+
     ui->setupUi(this);
 
     // Set protocols in combo box
@@ -2372,5 +2380,77 @@ void frmMain::on_btnCoolantMist_clicked()
 void frmMain::on_btnCoolantDisable_clicked()
 {
     sendCommand("M9", -1, m_settings->showUICommands());
+}
+
+
+// ---------------------------------------------------------------------------
+// Machine Settings ($$ editor) — Machine → Machine settings
+// ---------------------------------------------------------------------------
+
+void frmMain::on_actionMachine_settings_triggered()
+{
+    if (!SerialIf_IsOpen() || !m_resetCompleted)
+    {
+        QMessageBox::information(this, qApp->applicationDisplayName(),
+            tr("Connect to a controller before editing machine settings."));
+        return;
+    }
+
+    m_frmMachineSettings->beginRefresh();
+    sendCommand("$$", TI_MACHINE_SETTINGS_QUERY, m_settings->showUICommands());
+    m_frmMachineSettings->exec();
+}
+
+void frmMain::onMachineSettingsRefresh()
+{
+    if (!SerialIf_IsOpen() || !m_resetCompleted)
+    {
+        m_frmMachineSettings->setStatus(tr("Not connected."), true);
+        return;
+    }
+
+    m_frmMachineSettings->beginRefresh();
+    sendCommand("$$", TI_MACHINE_SETTINGS_QUERY, m_settings->showUICommands());
+}
+
+void frmMain::onMachineSettingsApply(const QList<QPair<int, QString>> &changes)
+{
+    if (!SerialIf_IsOpen() || !m_resetCompleted)
+    {
+        m_frmMachineSettings->setStatus(tr("Not connected."), true);
+        return;
+    }
+
+    // Fresh error slate for this Apply cycle.
+    m_frmMachineSettings->clearErrors();
+
+    // Force-show the individual $N=value writes in the console so the user
+    // always has a record of what actually persisted to EEPROM, regardless of
+    // their "Show UI commands" preference.
+    for (const auto &pair : changes)
+    {
+        sendCommand(QString("$%1=%2").arg(pair.first).arg(pair.second),
+                    TI_MACHINE_SETTINGS_WRITE, true);
+    }
+
+    // Re-query so the dialog reflects what the controller actually accepted.
+    // GRBL processes the queue in order, so this lands after the writes.
+    // This is a read, not a write — we respect showUICommands so the full
+    // `$$` dump doesn't flood the console after every Apply.
+    sendCommand("$$", TI_MACHINE_SETTINGS_QUERY, m_settings->showUICommands());
+    m_frmMachineSettings->setStatus(tr("Applied %1 change(s). Refreshing…").arg(changes.size()));
+}
+
+void frmMain::onMachineSettingsRestoreDefaults()
+{
+    if (!SerialIf_IsOpen() || !m_resetCompleted)
+    {
+        m_frmMachineSettings->setStatus(tr("Not connected."), true);
+        return;
+    }
+
+    sendCommand("$RST=$", TI_MACHINE_SETTINGS_WRITE, m_settings->showUICommands());
+    sendCommand("$$",      TI_MACHINE_SETTINGS_QUERY, m_settings->showUICommands());
+    m_frmMachineSettings->setStatus(tr("Defaults restored. Refreshing…"));
 }
 
