@@ -60,7 +60,10 @@ void frmMain::loadSettings()
     m_settings->setShowProgramCommands(set.value("showProgramCommands", 0).toBool());
     m_settings->setShowUICommands(set.value("showUICommands", 0).toBool());
     m_settings->setSpindleSpeedMin(set.value("spindleSpeedMin", 0).toInt());
-    m_settings->setSpindleSpeedMax(set.value("spindleSpeedMax", 100).toInt());
+    // 10000 matches the Reset-Defaults button in frmsettings.cpp. The previous
+    // value (100) was a typo that capped the slider at 100 RPM — fine if you
+    // interpret the slider as a percentage, broken as an absolute RPM range.
+    m_settings->setSpindleSpeedMax(set.value("spindleSpeedMax", 10000).toInt());
     m_settings->setLaserPowerMin(set.value("laserPowerMin", 0).toInt());
     m_settings->setLaserPowerMax(set.value("laserPowerMax", 100).toInt());
     m_settings->setRapidSpeed(set.value("rapidSpeed", 0).toInt());
