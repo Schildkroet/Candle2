@@ -482,6 +482,25 @@ void frmMain::ProcessResponse(const QString &data)
                 if ((ca.command.toUpper() == "$H" || ca.command.toUpper() == "$T") && m_homing)
                     m_homing = false;
 
+                // $$ response routed to Machine Settings dialog
+                if (ca.tableIndex == TI_MACHINE_SETTINGS_QUERY && m_frmMachineSettings)
+                {
+                    if (m_response.toUpper().contains("ERROR"))
+                        m_frmMachineSettings->appendError(tr("$$ refused: %1").arg(m_response.trimmed()));
+                    else
+                        m_frmMachineSettings->populate(m_response);
+                }
+
+                // $N=value write-back — append each failure so if multiple
+                // writes are rejected in one Apply, the user sees all of them
+                // rather than just the last one overwriting the rest.
+                if (ca.tableIndex == TI_MACHINE_SETTINGS_WRITE && m_frmMachineSettings &&
+                    m_response.toUpper().contains("ERROR"))
+                {
+                    m_frmMachineSettings->appendError(
+                        tr("%1 refused: %2").arg(ca.command, m_response.trimmed()));
+                }
+
                 // Reset complete
                 if (ca.command == "[CTRL+X]")
                 {

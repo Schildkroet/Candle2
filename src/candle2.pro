@@ -84,7 +84,8 @@ SOURCES += main.cpp\
     frmmain_settings.cpp \
     frmmain_util.cpp \
     frmmain_event.cpp \
-    GrIP/GrIP.cpp
+    GrIP/GrIP.cpp \
+    widgets/machinesettingsdialog.cpp
 
 HEADERS  += frmmain.h \
     frmsettings.h \
@@ -122,7 +123,8 @@ HEADERS  += frmmain.h \
     interface/SerialInterface.h \
     GrIP/CRC.h \
     GrIP/GrIP.h \
-    utils/safequeue.h
+    utils/safequeue.h \
+    widgets/machinesettingsdialog.h
 
 FORMS    += frmmain.ui \
     frmsettings.ui \
