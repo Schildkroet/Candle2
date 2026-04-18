@@ -27,7 +27,9 @@
 void frmMain::loadSettings()
 {
     QSettings set(m_settingsFilePath, QSettings::IniFormat);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     set.setIniCodec("UTF-8");
+#endif
 
     m_settingsLoading = true;
 
@@ -197,7 +199,9 @@ void frmMain::loadSettings()
 void frmMain::saveSettings()
 {
     QSettings set(m_settingsFilePath, QSettings::IniFormat);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     set.setIniCodec("UTF-8");
+#endif
 
     set.setValue("ipaddress", m_settings->IPAddress());
     set.setValue("ip_port", m_settings->Port());
