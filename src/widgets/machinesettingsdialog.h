@@ -1,37 +1,63 @@
 /*
  * Candle 2 — Machine Settings (GRBL $$ editor)
  *
- * Dynamic editor for GRBL firmware settings. Parses the controller's response
- * to `$$`, presents each entry in a table, and writes back only changed values
- * via `$N=value` commands. Works with GRBL, GRBL-Advanced, FluidNC, or any
- * variant that uses the `$N=value (description)` reply format.
+ * Editor for GRBL firmware settings. Parses the controller's `$$` reply,
+ * presents each entry in a tabbed, grouped UI with friendly labels and
+ * type-appropriate editors (checkbox for booleans, XYZ checkboxes for
+ * invert bitmasks, plain text for numbers and unknown entries). Writes
+ * back only changed values via `$N=value` commands.
+ *
+ * Unknown `$N` values fall back to the firmware's own description on an
+ * "Other" tab — this keeps the dialog forward-compatible with GRBL-Advanced,
+ * FluidNC, and any fork that adds settings we don't know about yet.
  */
 #ifndef MACHINESETTINGSDIALOG_H
 #define MACHINESETTINGSDIALOG_H
 
 #include <QDialog>
+#include <QHash>
 #include <QList>
+#include <QMap>
 #include <QPair>
 #include <QString>
 #include <QStringList>
 
-class QTableWidget;
+class QCheckBox;
+class QLineEdit;
 class QPushButton;
 class QLabel;
+class QTabWidget;
+class QTableWidget;
+class QWidget;
 
 class MachineSettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
+    // Kind + Group are public so the static registry in the .cpp (which lives
+    // in an anonymous namespace) can reference them. They're descriptive of
+    // each setting's editor behavior, not implementation state worth hiding.
+    enum class Kind
+    {
+        Generic,      // plain text — numbers, bitmasks we don't know about
+        Bool,         // 0/1 → QCheckBox
+        BitmaskXYZ,   // low three bits → X/Y/Z checkboxes; higher bits preserved
+    };
+
+    enum class Group
+    {
+        Motion, Invert, Report, Limits, Homing, Spindle, Axes, Other
+    };
+
     explicit MachineSettingsDialog(QWidget *parent = nullptr);
 
-    // Clear the table and show a "loading" hint. Call before emitting the $$
+    // Clear the tables and show a "loading" hint. Call before emitting the $$
     // query so the dialog visibly reflects in-flight state.
     void beginRefresh();
 
     // Parse the joined response string (as produced by frmMain's response
-    // accumulator, semicolon-separated) and populate the table. Safe to call
+    // accumulator, semicolon-separated) and populate the editor. Safe to call
     // multiple times — replaces existing rows.
     void populate(const QString &joinedResponse);
 
@@ -67,20 +93,34 @@ private slots:
 private:
     struct Row
     {
-        int n;
-        QString description;
+        int     n;
         QString originalValue;
+        QString label;          // friendly label if known, else firmware description
+        Kind    kind;
+        Group   group;
+
+        // Editor widget — exactly one of these is used depending on kind.
+        QLineEdit                *lineEdit = nullptr;
+        QCheckBox                *checkBox = nullptr;
+        QList<QCheckBox*>         bitChecks;          // size 3 for BitmaskXYZ (X/Y/Z)
+        int                       preservedHighBits = 0;  // bitmask bits 3+, round-tripped as-is
     };
 
-    QTableWidget *m_table;
+    void initTabs();
+    void addRowToTab(Row &row, const QString &n, const QString &description);
+    QString currentValue(const Row &r) const;
+
+    QTabWidget   *m_tabs;
+    QMap<Group, QTableWidget*> m_tablesByGroup;
+
     QPushButton  *m_btnRefresh;
     QPushButton  *m_btnApply;
     QPushButton  *m_btnRestoreDefaults;
     QPushButton  *m_btnClose;
     QLabel       *m_lblStatus;
 
-    QList<Row> m_rows;
-    QStringList m_accumulatedErrors;
+    QList<Row>    m_rows;
+    QStringList   m_accumulatedErrors;
 };
 
 #endif // MACHINESETTINGSDIALOG_H
