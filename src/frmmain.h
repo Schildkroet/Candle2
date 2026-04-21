@@ -82,22 +82,6 @@ namespace Ui
 }
 
 
-struct CommandAttributes
-{
-    int length;
-    int consoleIndex;
-    int tableIndex;
-    QString command;
-};
-
-
-struct CommandQueue
-{
-    QString command;
-    int tableIndex;
-    bool showInConsole;
-};
-
 struct CommandQueue2
 {
     QString command;
@@ -407,8 +391,6 @@ private:
 #endif
 
     QMenu *m_tableMenu;
-    QList<CommandAttributes> m_CommandAttributesList;
-    QList<CommandQueue> m_CommandQueueList;
     QElapsedTimer m_startTime;
 
     SafeQueue<CommandQueue2> mCommandsWait;

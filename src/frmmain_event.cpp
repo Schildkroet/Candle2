@@ -254,12 +254,6 @@ void frmMain::closeEvent(QCloseEvent *ce)
         SerialIf_Close();
     }
 
-    if (m_CommandQueueList.length() > 0)
-    {
-        m_CommandAttributesList.clear();
-        m_CommandQueueList.clear();
-    }
-
     mCommandsWait.clear();
     mCommandsSent.clear();
 }

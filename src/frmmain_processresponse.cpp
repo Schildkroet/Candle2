@@ -513,8 +513,6 @@ void frmMain::ProcessResponse(const QString &data)
                 if ((ca.command.contains("M2") || ca.command.contains("M30")) &&
                     m_response.contains("ok") && !m_response.contains("[Pgm End]"))
                 {
-                    m_CommandAttributesList.clear();
-                    m_CommandQueueList.clear();
                     mCommandsWait.clear();
                     mCommandsSent.clear();
                 }
@@ -737,8 +735,6 @@ void frmMain::ProcessResponse(const QString &data)
                 m_updateParserStatus = true;
                 m_statusReceived = true;
 
-                m_CommandAttributesList.clear();
-                m_CommandQueueList.clear();
                 mCommandsWait.clear();
                 mCommandsSent.clear();
 

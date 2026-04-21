@@ -194,7 +194,6 @@ void frmMain::on_cmdZMinus_released()
 
 void frmMain::on_cmdStop_clicked()
 {
-    m_CommandQueueList.clear();
     mCommandsWait.clear();
     mCommandsSent.clear();
 

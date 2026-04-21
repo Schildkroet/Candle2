@@ -427,10 +427,10 @@ void frmMain::UpdateComPorts()
     foreach (int i, QSerialPortInfo::standardBaudRates())
     {
         // Only list between 9600 to 500k
-        /*if(i < 9600 || i > 500000)
+        if(i < 9600 || i > 500000)
         {
             continue;
-        }*/
+        }
         ui->comboBaud->addItem(QString::number(i));
     }
 
@@ -699,9 +699,6 @@ void frmMain::GrblReset()
     m_statusReceived = true;
 
     // Drop all remaining commands in buffer
-    m_CommandAttributesList.clear();
-    m_CommandQueueList.clear();
-
     mCommandsWait.clear();
     mCommandsSent.clear();
 
@@ -717,21 +714,6 @@ void frmMain::GrblReset()
     m_workOffset = QVector3D();
     m_workOffsetAB[0] = 0.0;
     m_workOffsetAB[1] = 0.0;
-
-    // Prepare reset response catch
-    /*CommandAttributes ca;
-
-    ca.command = "[CTRL+X]";
-
-    if (m_settings->showUICommands())
-    {
-        ui->txtConsole->appendPlainText(ca.command);
-    }
-
-    ca.consoleIndex = m_settings->showUICommands() ? ui->txtConsole->blockCount() - 1 : -1;
-    ca.tableIndex = -1;
-    ca.length = ca.command.length() + 1;
-    m_CommandAttributesList.append(ca);*/
 
     CommandQueue2 ca;
 
@@ -1221,14 +1203,10 @@ void frmMain::restoreOffsets()
 
 void frmMain::sendNextFileCommands()
 {
-    if (m_CommandQueueList.length() > 0)
-        return;
-
     QString command = FeedOverride(m_currentModel->data(m_currentModel->index(m_fileCommandIndex, 1)).toString());
 
-    while (m_fileCommandIndex < m_currentModel->rowCount() - 1 && !(!m_CommandAttributesList.isEmpty() && m_CommandAttributesList.last().command.contains(QRegularExpression("M0*2|M30"))))
+    while (m_fileCommandIndex < m_currentModel->rowCount() - 1)
     {
-        //m_currentModel->setData(m_currentModel->index(m_fileCommandIndex, 2), GCodeItem::Sent);
         sendCommand(command, m_fileCommandIndex, m_settings->showProgramCommands());
         m_fileCommandIndex++;
 
@@ -1786,25 +1764,7 @@ void frmMain::on_actAbout_triggered()
 
 bool frmMain::DataIsEnd(QString data)
 {
-    QStringList ends;
-
-    ends << "ok";
-    ends << "error";
-//    ends << "Reset to continue";
-//    ends << "'$' for help";
-//    ends << "'$H'|'$X' to unlock";
-//    ends << "Caution: Unlocked";
-//    ends << "Enabled";
-//    ends << "Disabled";
-//    ends << "Check Door";
-//    ends << "Pgm End";
-
-    foreach (QString str, ends)
-    {
-        if (data.contains(str)) return true;
-    }
-
-    return false;
+    return data == "ok" || data.startsWith("error:");
 }
 
 bool frmMain::DataIsFloating(QString data)
@@ -1813,6 +1773,7 @@ bool frmMain::DataIsFloating(QString data)
 
     ends << "Reset to continue";
     ends << "'$H'|'$X' to unlock";
+    ends << "ALARM:";         // numeric alarm codes from GRBL 1.1 (e.g. ALARM:1)
     ends << "ALARM: Soft limit";
     ends << "ALARM: Hard limit";
     ends << "Check Door";
