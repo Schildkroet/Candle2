@@ -15,46 +15,46 @@ jobs:
       SOURCE_DIR:   ${{ github.workspace }}
       QT_VERSION:   5.15.2
       ARTIFACT:     Candle2_AppImage
-  
+
     defaults:
       run:
         shell: bash
 
-    steps:  
+    steps:
       - name: Install QT
         run: |
           sudo apt install qt5-qmake qtbase5-dev-tools libqt5serialport5-dev libfuse2 -y
-  
+
       - name: Checkout repo
         uses: actions/checkout@v4
-      
+
       - name: Configure
-        run: | 
+        run: |
           mkdir build && cd build
           qmake ../src/candle2.pro
           cd ..
-        
+
       - name: Build
         run: |
           cd build
           make -j6
           cd ..
-        
+
       - name: Deploy
-        run: | 
+        run: |
           mkdir -p AppDir/usr/bin
           mkdir deploy && cd deploy
           wget "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod a+x *.AppImage
-          cp ../build/Candle2 ../AppDir/usr/bin
+          cp ../bin/Candle2 ../AppDir/usr/bin
           ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2
           ./linuxdeployqt-continuous-x86_64.AppImage ../AppDir/usr/share/applications/Candle2.desktop -verbose=2 -appimage
           cd ..
-          
-      
+
+
       - name: Upload
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: ${{ env.ARTIFACT }}
           path: |
             deploy/Candle2*.AppImage
@@ -88,7 +88,7 @@ jobs:
           host:         windows
           target:       desktop
           arch:         win64_msvc2019_64
-          dir:          ${{ runner.temp }}  
+          dir:          ${{ runner.temp }}
           setup-python: false
 
       - name: Download JOM
@@ -101,7 +101,7 @@ jobs:
         working-directory: ${{ runner.temp }}
         run:  |
               7z x jom.zip -ojom
-              
+
       - name: Create build directory
         run:  mkdir ${{ runner.temp }}\build
 
@@ -117,16 +117,16 @@ jobs:
               ${{ runner.temp }}\jom\jom -j3
               cd release
               windeployqt --qmldir ${{ env.SOURCE_DIR }} Candle2.exe --pdb --release --compiler-runtime
-              copy C:\Windows\System32\concrt140.dll . 
+              copy C:\Windows\System32\concrt140.dll .
               copy C:\Windows\System32\vccorlib140.dll .
               copy C:\Windows\System32\msvcp140.dll .
               copy C:\Windows\System32\vcruntime140.dll .
-              
+
       - name: Zip build
         working-directory: ${{ runner.temp }}
         run:  |
               7z a candle2-win.zip ${{ runner.temp }}\build\* -r -x!*.h -x!*.obj -x!*.cpp -x!*.rc -x!*.stash -x!*.Debug -x!*.Release -x!Makefile
-              
+
       - name: Save build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -175,7 +175,7 @@ jobs:
         # bundle is self-contained. Without this, the app only runs on
         # machines that already have Homebrew Qt installed.
         run: |
-          cd build
+          cd bin
           "$(brew --prefix qt)/bin/macdeployqt" Candle2.app -verbose=1
 
       - name: Zip .app
@@ -183,7 +183,7 @@ jobs:
         # (including the ad-hoc code signature macdeployqt applies) survive
         # the round-trip through the Actions artifact store.
         run: |
-          cd build
+          cd bin
           ditto -c -k --sequesterRsrc --keepParent Candle2.app "${{ env.ARTIFACT }}"
 
       - name: Save build artifact
