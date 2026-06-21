@@ -245,6 +245,14 @@ private slots:
 
     void on_btnCoolantDisable_clicked();
 
+    void on_btnProbeLeft_clicked();
+    void on_btnProbeRight_clicked();
+    void on_btnProbeFront_clicked();
+    void on_btnProbeBack_clicked();
+    void on_btnProbeTop_clicked();
+    void on_btnProbeCenterX_clicked();
+    void on_btnProbeCenterY_clicked();
+
 protected:
     void showEvent(QShowEvent *se);
     void hideEvent(QHideEvent *he);
@@ -464,6 +472,17 @@ private:
     double m_abortB = sNan;
     double m_probeFirstZ = 0.0;
     QVector3D m_workOffset;
+
+    // Probe tab
+    enum ProbeDirection { ProbeNone, ProbeLeft, ProbeRight, ProbeFront, ProbeBack, ProbeTop };
+    void sendProbeCommands(ProbeDirection dir, const QString &axis, double sign);
+    ProbeDirection m_probeDirection = ProbeNone;
+    bool m_probeSecondPass = false;
+    double m_probeXLeft  = qQNaN();
+    double m_probeXRight = qQNaN();
+    double m_probeYFront = qQNaN();
+    double m_probeYBack  = qQNaN();
+    double m_probeZTop   = qQNaN();
     double m_workOffsetAB[2] = {0.0, 0.0};
 
     QStringList m_recentFiles;

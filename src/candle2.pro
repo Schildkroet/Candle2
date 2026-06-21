@@ -87,6 +87,7 @@ SOURCES += main.cpp\
     GrIP/CRC.c \
     frmmain_heightmap.cpp \
     frmmain_jogcontrol.cpp \
+    frmmain_probe.cpp \
     frmmain_processresponse.cpp \
     frmmain_settings.cpp \
     frmmain_util.cpp \

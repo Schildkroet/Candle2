@@ -705,6 +705,7 @@ void frmMain::GrblReset()
     // Reset response parsing state
     m_response.clear();
     m_holdingOnError = false;
+    m_toolChangeActive = false;
     m_errorMessages.clear();
     m_abortX = sNan;
     m_abortY = sNan;

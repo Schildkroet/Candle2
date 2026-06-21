@@ -43,29 +43,50 @@ namespace
         const char *unit;   // optional suffix shown after the label
     };
 
+    // Registry derived from GRBL-RV Report_GrblSettings() and Settings_StoreGlobalSetting().
+    // $N numbers and semantics come directly from the firmware source — not from generic GRBL 1.1.
     static const Info kRegistry[] = {
+        // ---- Control / invert ----
         {   0, Group::Motion,  Kind::Generic,     "Step pulse",                  "µs"       },
-        {   1, Group::Motion,  Kind::Generic,     "Step idle delay",             "ms"       },
         {   2, Group::Invert,  Kind::BitmaskXYZ,  "Step port invert",            nullptr    },
         {   3, Group::Invert,  Kind::BitmaskXYZ,  "Direction port invert",       nullptr    },
         {   4, Group::Invert,  Kind::Bool,        "Step enable invert",          nullptr    },
         {   5, Group::Invert,  Kind::Bool,        "Limit pin invert",            nullptr    },
         {   6, Group::Invert,  Kind::Bool,        "Probe pin invert",            nullptr    },
-        {  10, Group::Report,  Kind::Generic,     "Status report mask",          nullptr    },
+        // ---- Motion ----
+        {   1, Group::Motion,  Kind::Generic,     "Step idle delay",             "ms"       },
         {  11, Group::Motion,  Kind::Generic,     "Junction deviation",          "mm"       },
         {  12, Group::Motion,  Kind::Generic,     "Arc tolerance",               "mm"       },
+        {  14, Group::Motion,  Kind::Generic,     "Tool change mode",            nullptr    },
+        {  33, Group::Motion,  Kind::Bool,        "Lathe mode",                  nullptr    },
+        {  35, Group::Motion,  Kind::Bool,        "Enable M7 mist coolant",      nullptr    },
+        {  37, Group::Motion,  Kind::Bool,        "Backlash compensation",       nullptr    },
+        {  38, Group::Motion,  Kind::Bool,        "Enable multi-axis",           nullptr    },
+        {  41, Group::Motion,  Kind::Bool,        "Force init alarm",            nullptr    },
+        // ---- Report ----
+        {  10, Group::Report,  Kind::Generic,     "Status report mask",          nullptr    },
         {  13, Group::Report,  Kind::Bool,        "Report inches",               nullptr    },
+        {  34, Group::Report,  Kind::Bool,        "Buffer sync on NVM write",    nullptr    },
+        // ---- Limits ----
         {  20, Group::Limits,  Kind::Bool,        "Soft limits",                 nullptr    },
         {  21, Group::Limits,  Kind::Bool,        "Hard limits",                 nullptr    },
+        {  36, Group::Limits,  Kind::Bool,        "Force hard limit check",      nullptr    },
+        {  42, Group::Limits,  Kind::Bool,        "Check limits at init",        nullptr    },
+        // ---- Homing ----
         {  22, Group::Homing,  Kind::Bool,        "Homing cycle enable",         nullptr    },
         {  23, Group::Homing,  Kind::BitmaskXYZ,  "Homing direction invert",     nullptr    },
         {  24, Group::Homing,  Kind::Generic,     "Homing feed",                 "mm/min"   },
         {  25, Group::Homing,  Kind::Generic,     "Homing seek",                 "mm/min"   },
         {  26, Group::Homing,  Kind::Generic,     "Homing debounce",             "ms"       },
         {  27, Group::Homing,  Kind::Generic,     "Homing pull-off",             "mm"       },
+        {  39, Group::Homing,  Kind::Bool,        "Homing init lock",            nullptr    },
+        {  40, Group::Homing,  Kind::Bool,        "Homing force set origin",     nullptr    },
+        // ---- Spindle ----
+        {  15, Group::Spindle, Kind::Generic,     "Encoder PPR",                 nullptr    },
         {  30, Group::Spindle, Kind::Generic,     "Max spindle speed",           "RPM"      },
         {  31, Group::Spindle, Kind::Generic,     "Min spindle speed",           "RPM"      },
         {  32, Group::Spindle, Kind::Bool,        "Laser mode",                  nullptr    },
+        // ---- Axes — linear (X/Y/Z) ----
         { 100, Group::Axes,    Kind::Generic,     "X steps per mm",              "step/mm"  },
         { 101, Group::Axes,    Kind::Generic,     "Y steps per mm",              "step/mm"  },
         { 102, Group::Axes,    Kind::Generic,     "Z steps per mm",              "step/mm"  },
@@ -78,6 +99,20 @@ namespace
         { 130, Group::Axes,    Kind::Generic,     "X max travel",                "mm"       },
         { 131, Group::Axes,    Kind::Generic,     "Y max travel",                "mm"       },
         { 132, Group::Axes,    Kind::Generic,     "Z max travel",                "mm"       },
+        { 140, Group::Axes,    Kind::Generic,     "X backlash",                  "mm"       },
+        { 141, Group::Axes,    Kind::Generic,     "Y backlash",                  "mm"       },
+        { 142, Group::Axes,    Kind::Generic,     "Z backlash",                  "mm"       },
+        // ---- Axes — rotary (A/B, only when multi-axis enabled) ----
+        { 103, Group::Axes,    Kind::Generic,     "A steps per deg",             "step/°"   },
+        { 104, Group::Axes,    Kind::Generic,     "B steps per deg",             "step/°"   },
+        { 113, Group::Axes,    Kind::Generic,     "A max rate",                  "°/min"    },
+        { 114, Group::Axes,    Kind::Generic,     "B max rate",                  "°/min"    },
+        { 123, Group::Axes,    Kind::Generic,     "A acceleration",              "°/s²"     },
+        { 124, Group::Axes,    Kind::Generic,     "B acceleration",              "°/s²"     },
+        { 133, Group::Axes,    Kind::Generic,     "A max travel",                "°"        },
+        { 134, Group::Axes,    Kind::Generic,     "B max travel",                "°"        },
+        { 143, Group::Axes,    Kind::Generic,     "A backlash",                  "°"        },
+        { 144, Group::Axes,    Kind::Generic,     "B backlash",                  "°"        },
     };
 
     const Info *lookup(int n)
@@ -105,7 +140,7 @@ namespace
     // Ordered list of groups — drives tab order.
     const Group kGroupOrder[] = {
         Group::Motion, Group::Invert, Group::Report, Group::Limits,
-        Group::Homing, Group::Spindle, Group::Axes,  Group::Other,
+        Group::Homing, Group::Spindle, Group::Axes, Group::Other,
     };
 
     enum Column { ColN = 0, ColLabel, ColValue, ColCount };

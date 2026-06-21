@@ -415,7 +415,12 @@ void frmMain::ProcessResponse(const QString &data)
                             QThread::msleep(10);
                         }
                         ca.command = "$T";
+                        ca.tableIndex = -1;
                         mCommandsSent.push_front(ca);
+                    }
+                    else
+                    {
+                        on_cmdFileAbort_clicked();
                     }
 
                     m_jogVector.setZ(0.0);
@@ -517,8 +522,51 @@ void frmMain::ProcessResponse(const QString &data)
                     mCommandsSent.clear();
                 }
 
-                // Probing (heightmap)
-                if (ca.command.contains("G38.2") && m_heightMapMode && ca.tableIndex > -1)
+                // Probing (probe tab)
+                if (ca.command.contains("G38.2") && m_probeDirection != ProbeNone)
+                {
+                    if (ui->chkProbeTwoPass->isChecked() && !m_probeSecondPass) {
+                        // First (fast) touch — ignore result, wait for the slow pass
+                        m_probeSecondPass = true;
+                    } else {
+                        static const QRegularExpression rxPRBTab(".*PRB:([^,]*),([^,]*),([^,:\\]]*)");
+                        auto pm = rxPRBTab.match(m_response);
+                        if (pm.hasMatch()) {
+                            double x = pm.captured(1).toDouble();
+                            double y = pm.captured(2).toDouble();
+                            double z = pm.captured(3).toDouble();
+                            double r = ui->txtProbeDiameter->value() / 2.0;
+                            switch (m_probeDirection) {
+                            case ProbeLeft:
+                                m_probeXLeft = x + r;
+                                ui->txtProbeXLeft->setText(QString::number(m_probeXLeft, 'f', 3));
+                                break;
+                            case ProbeRight:
+                                m_probeXRight = x - r;
+                                ui->txtProbeXRight->setText(QString::number(m_probeXRight, 'f', 3));
+                                break;
+                            case ProbeFront:
+                                m_probeYFront = y + r;
+                                ui->txtProbeYFront->setText(QString::number(m_probeYFront, 'f', 3));
+                                break;
+                            case ProbeBack:
+                                m_probeYBack = y - r;
+                                ui->txtProbeYBack->setText(QString::number(m_probeYBack, 'f', 3));
+                                break;
+                            case ProbeTop:
+                                m_probeZTop = z;
+                                ui->txtProbeZTop->setText(QString::number(m_probeZTop, 'f', 3));
+                                break;
+                            default: break;
+                            }
+                            ui->btnProbeCenterX->setEnabled(!qIsNaN(m_probeXLeft) && !qIsNaN(m_probeXRight));
+                            ui->btnProbeCenterY->setEnabled(!qIsNaN(m_probeYFront) && !qIsNaN(m_probeYBack));
+                        }
+                        m_probeDirection  = ProbeNone;
+                        m_probeSecondPass = false;
+                    }
+                }
+                else if (ca.command.contains("G38.2") && m_heightMapMode && ca.tableIndex > -1)
                 {
                     static const QRegularExpression rxPRB(".*PRB:([^,]*),([^,]*),([^,:\\]]*)");
                     double z = qQNaN();
