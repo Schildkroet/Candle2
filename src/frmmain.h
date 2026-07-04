@@ -168,6 +168,7 @@ private slots:
     void on_cmdFront_clicked();
     void on_cmdLeft_clicked();
     void on_cmdIsometric_clicked();
+    void on_cmdLathe_clicked();
     void on_actAbout_triggered();
     void on_grpOverriding_toggled(bool checked);
     void on_grpSpindle_toggled(bool checked);

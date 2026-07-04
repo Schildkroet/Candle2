@@ -197,7 +197,7 @@ QVector3D GcodePreprocessorUtils::updatePointWithCommand(const QVector3D &initia
     return newPoint;
 }
 
-QVector3D GcodePreprocessorUtils::updateCenterWithCommand(QStringList commandArgs, QVector3D initial, QVector3D nextPoint, bool absoluteIJKMode, bool clockwise)
+QVector3D GcodePreprocessorUtils::updateCenterWithCommand(PointSegment::planes plane, QStringList commandArgs, QVector3D initial, QVector3D nextPoint, bool absoluteIJKMode, bool clockwise)
 {
     double i = qQNaN();
     double j = qQNaN();
@@ -227,7 +227,7 @@ QVector3D GcodePreprocessorUtils::updateCenterWithCommand(QStringList commandArg
     }
 
     if (qIsNaN(i) && qIsNaN(j) && qIsNaN(k)) {
-        return convertRToCenter(initial, nextPoint, r, absoluteIJKMode, clockwise);
+        return convertRToCenter(plane, initial, nextPoint, r, absoluteIJKMode, clockwise);
     }
 
     return updatePointWithCommand(initial, i, j, k, absoluteIJKMode);
@@ -324,12 +324,29 @@ double GcodePreprocessorUtils::parseCoord(QStringList argList, char c)
 //    return l;
 //}
 
-QVector3D GcodePreprocessorUtils::convertRToCenter(QVector3D start, QVector3D end, double radius, bool absoluteIJK, bool clockwise) {
+QVector3D GcodePreprocessorUtils::convertRToCenter(PointSegment::planes plane, QVector3D start, QVector3D end, double radius, bool absoluteIJK, bool clockwise) {
     double R = radius;
     QVector3D center;
 
-    double x = end.x() - start.x();
-    double y = end.y() - start.y();
+    // Rotate start/end into the arc's plane so the bisector math below always
+    // operates on the plane's two in-plane axes (X/Y), regardless of G17/18/19.
+    QMatrix4x4 m;
+    m.setToIdentity();
+    switch (plane) {
+    case PointSegment::XY:
+        break;
+    case PointSegment::ZX:
+        m.rotate(90, 1.0, 0.0, 0.0);
+        break;
+    case PointSegment::YZ:
+        m.rotate(-90, 0.0, 1.0, 0.0);
+        break;
+    }
+    QVector3D rStart = m * start;
+    QVector3D rEnd = m * end;
+
+    double x = rEnd.x() - rStart.x();
+    double y = rEnd.y() - rStart.y();
 
     double h_x2_div_d = 4 * R * R - x * x - y * y;
     if (h_x2_div_d < 0) { qDebug() << "Error computing arc radius."; }
@@ -348,13 +365,31 @@ QVector3D GcodePreprocessorUtils::convertRToCenter(QVector3D start, QVector3D en
     double offsetX = 0.5 * (x - (y * h_x2_div_d));
     double offsetY = 0.5 * (y + (x * h_x2_div_d));
 
+    QVector3D rCenter;
     if (!absoluteIJK) {
-        center.setX(start.x() + offsetX);
-        center.setY(start.y() + offsetY);
+        rCenter.setX(rStart.x() + offsetX);
+        rCenter.setY(rStart.y() + offsetY);
+        rCenter.setZ(rStart.z());
     } else {
-        center.setX(offsetX);
-        center.setY(offsetY);
+        rCenter.setX(offsetX);
+        rCenter.setY(offsetY);
+        rCenter.setZ(0);
     }
+
+    // Rotate the center back out of the plane's local frame into world coordinates.
+    QMatrix4x4 mInv;
+    mInv.setToIdentity();
+    switch (plane) {
+    case PointSegment::XY:
+        break;
+    case PointSegment::ZX:
+        mInv.rotate(-90, 1.0, 0.0, 0.0);
+        break;
+    case PointSegment::YZ:
+        mInv.rotate(90, 0.0, 1.0, 0.0);
+        break;
+    }
+    center = mInv * rCenter;
 
     return center;
 }
@@ -449,7 +484,7 @@ QList<QVector3D> GcodePreprocessorUtils::generatePointsAlongArcBDring(PointSegme
 
     // Calculate radius if necessary.
     if (radius == 0) {
-        radius = sqrt(pow((double)(start.x() - center.x()), 2.0) + pow((double)(end.y() - center.y()), 2.0));
+        radius = sqrt(pow((double)(start.x() - center.x()), 2.0) + pow((double)(start.y() - center.y()), 2.0));
     }
 
     double startAngle = getAngle(center, start);

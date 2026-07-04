@@ -19,6 +19,8 @@ GcodeParser::GcodeParser(QObject *parent) : QObject(parent)
     m_commandNumber = 0;
     m_Angle = 0;
     m_isRotationMove = false;
+    m_offset = QVector3D(0, 0, 0);
+    m_diameterMode = false;
 
     // Settings
     m_speedOverride = -1;
@@ -101,6 +103,8 @@ void GcodeParser::reset(const QVector3D &initialPoint)
     // The unspoken home location.
     //m_currentPoint = initialPoint;
     m_currentPoint = QVector3D(0, 0, 0);
+    m_offset = QVector3D(0, 0, 0);
+    m_diameterMode = false;
     m_currentPlane = PointSegment::XY;
     static const QVector3D nanAxes(qQNaN(), qQNaN(), qQNaN());
     this->m_points.append(new PointSegment(&this->m_currentPoint, &nanAxes, -1));
@@ -332,7 +336,7 @@ PointSegment *GcodeParser::addArcPointSegment(const QVector3D &nextPoint, bool c
     static const QVector3D nanAxes4(qQNaN(), qQNaN(), qQNaN());
     PointSegment *ps = new PointSegment(&nextPoint, &nanAxes4, m_commandNumber++);
 
-    QVector3D center = GcodePreprocessorUtils::updateCenterWithCommand(args, this->m_currentPoint, nextPoint, this->m_inAbsoluteIJKMode, clockwise);
+    QVector3D center = GcodePreprocessorUtils::updateCenterWithCommand(m_currentPlane, args, this->m_currentPoint, nextPoint, this->m_inAbsoluteIJKMode, clockwise);
     double radius = GcodePreprocessorUtils::parseCoord(args, 'R');
 
     // Calculate radius if necessary.
@@ -371,6 +375,26 @@ PointSegment *GcodeParser::addArcPointSegment(const QVector3D &nextPoint, bool c
     return ps;
 }
 
+// In G7 (diameter) mode, the X word in the file is a diameter; internally we always
+// work in radius, so halve it before it reaches the absolute/incremental position math.
+// Only the X endpoint word is affected: per spec, arc I/J/K offsets never scale with
+// diameter mode, and G76's I/J/K are converted separately where they're parsed.
+QStringList GcodeParser::applyDiameterMode(const QStringList &args) const
+{
+    if (!m_diameterMode) return args;
+
+    QStringList result;
+    result.reserve(args.size());
+    foreach (const QString &arg, args) {
+        if (arg.length() > 0 && arg.at(0).toUpper() == 'X') {
+            result.append(QString("X%1").arg(arg.mid(1).toDouble() / 2.0, 0, 'f', 6));
+        } else {
+            result.append(arg);
+        }
+    }
+    return result;
+}
+
 void GcodeParser::handleMCode(float code, const QStringList &args)
 {
     Q_UNUSED(code);
@@ -383,9 +407,18 @@ PointSegment * GcodeParser::handleGCode(float code, const QStringList &args)
 {
     PointSegment *ps = NULL;
 
-    QVector4D next = GcodePreprocessorUtils::updatePointWithCommand(args, this->m_currentPoint, this->m_inAbsoluteMode);
+    QStringList posArgs = applyDiameterMode(args);
+    QVector4D next = GcodePreprocessorUtils::updatePointWithCommand(posArgs, this->m_currentPoint, this->m_inAbsoluteMode);
 
     QVector3D nextPoint(next.x(), next.y(), next.z());
+
+    // In absolute mode, apply the active G92 offset to any axis explicitly given in this command.
+    // Axes carried over from m_currentPoint already have the offset baked in, so they're left alone.
+    if (this->m_inAbsoluteMode) {
+        if (!qIsNaN(GcodePreprocessorUtils::parseCoord(posArgs, 'X'))) nextPoint.setX(nextPoint.x() + m_offset.x());
+        if (!qIsNaN(GcodePreprocessorUtils::parseCoord(posArgs, 'Y'))) nextPoint.setY(nextPoint.y() + m_offset.y());
+        if (!qIsNaN(GcodePreprocessorUtils::parseCoord(posArgs, 'Z'))) nextPoint.setZ(nextPoint.z() + m_offset.z());
+    }
 
     if(!qIsNaN(next.w()))
     {
@@ -413,6 +446,8 @@ PointSegment * GcodeParser::handleGCode(float code, const QStringList &args)
     else if (code == 19.0f) this->m_currentPlane = PointSegment::YZ;
     else if (code == 20.0f) this->m_isMetric = false;
     else if (code == 21.0f) this->m_isMetric = true;
+    else if (code == 7.0f) this->m_diameterMode = true;
+    else if (code == 8.0f) this->m_diameterMode = false;
     else if (code == 33.0f) ps = addLinearPointSegment(nextPoint, false);
     else if (code == 90.0f) this->m_inAbsoluteMode = true;
     else if (code == 90.1f) this->m_inAbsoluteIJKMode = true;
@@ -420,42 +455,108 @@ PointSegment * GcodeParser::handleGCode(float code, const QStringList &args)
     else if (code == 91.1f) this->m_inAbsoluteIJKMode = false;
     else if (code == 98.0f) this->m_retractOldZ = true;
     else if (code == 99.0f) this->m_retractOldZ = false;
+    else if (code == 92.0f)
+    {
+        // Redefine current position: no motion, just shift the offset so future
+        // absolute coordinates resolve to the same drawn position as the machine sees it.
+        if (!qIsNaN(GcodePreprocessorUtils::parseCoord(posArgs, 'X'))) m_offset.setX(this->m_currentPoint.x() - nextPoint.x() + m_offset.x());
+        if (!qIsNaN(GcodePreprocessorUtils::parseCoord(posArgs, 'Y'))) m_offset.setY(this->m_currentPoint.y() - nextPoint.y() + m_offset.y());
+        if (!qIsNaN(GcodePreprocessorUtils::parseCoord(posArgs, 'Z'))) m_offset.setZ(this->m_currentPoint.z() - nextPoint.z() + m_offset.z());
+    }
+    else if (code == 92.1f || code == 92.2f)
+    {
+        m_offset = QVector3D(0, 0, 0);
+    }
+    else if (code == 28.0f || code == 30.0f)
+    {
+        // True reference position is unknown to the previewer; draw the rapid
+        // traverse to whatever intermediate point is given in this block.
+        ps = addLinearPointSegment(nextPoint, true);
+    }
+    else if (code == 80.0f)
+    {
+        // Cancel canned cycle: modal motion reverts to G0 per spec, not the drill cycle.
+        this->m_lastGcodeCommand = 0.0f;
+    }
 
     else if (code == 76.0f)
     {
-        // Currently only display the final cut
-        QVector3D dl_start(m_currentPoint);
-        QVector3D dl_end(m_currentPoint);
-        dl_end.setZ(nextPoint.z());
+        // Threading cycle (LinuxCNC/grblHAL-style G76): I = thread peak taper offset,
+        // J = initial cut depth, K = full thread depth, R = depth degression
+        // (R1 = constant depth per pass, R2 = constant cut area), H = spring pass count.
+        // Draws every roughing pass plus the spring passes, not just the final cut.
+        double taper = qQNaN();
+        double initialDepth = qQNaN();
+        double fullDepth = qQNaN();
+        double degression = qQNaN();
+        double springPasses = qQNaN();
         char c;
-        double p = qQNaN();
-        double j = qQNaN();
-        double k = qQNaN();
 
         for (int i = 0; i < args.length(); i++) {
             if (args.at(i).length() > 0) {
                 c = args.at(i).at(0).toUpper().toLatin1();
                 switch (c) {
                 case 'I':
-                    p = args.at(i).mid(1).toDouble();
+                    taper = args.at(i).mid(1).toDouble();
                     break;
                 case 'J':
-                    j = args.at(i).mid(1).toDouble();
+                    initialDepth = args.at(i).mid(1).toDouble();
                     break;
                 case 'K':
-                    k = args.at(i).mid(1).toDouble();
+                    fullDepth = args.at(i).mid(1).toDouble();
+                    break;
+                case 'R':
+                    degression = args.at(i).mid(1).toDouble();
+                    break;
+                case 'H':
+                    springPasses = args.at(i).mid(1).toDouble();
                     break;
                 }
             }
         }
 
-        float fin_depth = m_currentPoint.x() + p - k;
+        // Per spec, G76's own I/J/K follow the active diameter/radius mode, unlike arc I/J/K.
+        if (this->m_diameterMode) {
+            if (!qIsNaN(taper)) taper /= 2.0;
+            if (!qIsNaN(initialDepth)) initialDepth /= 2.0;
+            if (!qIsNaN(fullDepth)) fullDepth /= 2.0;
+        }
 
-        dl_start.setX(fin_depth);
-        addLinearPointSegment(dl_start, true);
-        dl_start.setZ(dl_end.z());
-        addLinearPointSegment(dl_start, false);
-        ps = addLinearPointSegment(dl_end, true);
+        if (qIsNaN(taper)) taper = 0;
+        if (qIsNaN(initialDepth)) initialDepth = 0;
+        if (qIsNaN(fullDepth)) fullDepth = 0;
+        if (qIsNaN(degression) || degression <= 0) degression = 1.0;
+        int spring = qIsNaN(springPasses) ? 0 : qMax(0, (int)springPasses);
+
+        // Pass n cuts to depth initialDepth * n^(1/degression), clamped to fullDepth.
+        int passCount = 1;
+        if (initialDepth > 0 && fullDepth > initialDepth) {
+            while (passCount < 200 && initialDepth * pow((double)passCount, 1.0 / degression) < fullDepth) passCount++;
+        }
+
+        QVector3D safePos(m_currentPoint);
+        double startZ = m_currentPoint.z();
+        double endZ = nextPoint.z();
+
+        for (int n = 1; n <= passCount + spring; n++) {
+            double depth = (n <= passCount) ? qMin(fullDepth, initialDepth * pow((double)n, 1.0 / degression)) : fullDepth;
+
+            QVector3D atDepth(safePos);
+            atDepth.setX(safePos.x() + taper - depth);
+            addLinearPointSegment(atDepth, true);      // rapid in to this pass's depth
+            atDepth.setZ(endZ);
+            addLinearPointSegment(atDepth, false);      // thread-cutting feed along Z
+
+            QVector3D retract(atDepth);
+            retract.setX(safePos.x());
+            if (n < passCount + spring) {
+                addLinearPointSegment(retract, true);   // rapid out to clearance X
+                retract.setZ(startZ);
+                addLinearPointSegment(retract, true);   // rapid back to start Z for the next pass
+            } else {
+                ps = addLinearPointSegment(retract, true); // last pass: stay retracted at final Z
+            }
+        }
     }
 
     else if (code == 81.0f || code == 82.0f || code == 83.0f)

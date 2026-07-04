@@ -63,6 +63,8 @@ private:
     PointSegment::planes m_currentPlane;
     double m_Angle;
     bool m_isRotationMove;
+    QVector3D m_offset; // G92 coordinate offset
+    bool m_diameterMode; // G7 diameter / G8 radius mode (lathe X axis)
 
     // Settings
     double m_speedOverride;
@@ -87,6 +89,7 @@ private:
     PointSegment *addLinearPointSegment(const QVector3D &nextPoint, bool fastTraverse);
     PointSegment *addArcPointSegment(const QVector3D &nextPoint, bool clockwise, const QStringList &args);
     void setLastGcodeCommand(float num);
+    QStringList applyDiameterMode(const QStringList &args) const;
 };
 
 #endif // GCODEPARSER_H

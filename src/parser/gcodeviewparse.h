@@ -56,9 +56,6 @@ signals:
 public slots:
 
 private:
-    bool absoluteMode;
-    bool absoluteIJK;
-
     // Parsed object
     QVector3D m_viewLowerBounds;
     QVector3D m_viewUpperBounds;

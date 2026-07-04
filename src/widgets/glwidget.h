@@ -35,6 +35,7 @@ public:
     void setTopView();
     void setFrontView();
     void setLeftView();
+    void setLatheView();
 
     int fps();
     void setFps(int fps);
@@ -116,6 +117,7 @@ private:
     double m_xRotTarget, m_yRotTarget;
     double m_xRotStored, m_yRotStored;
     bool m_animateView;
+    bool m_latheView; // Turning (X vertical / Z horizontal) view instead of the default Z-up orientation
     QString m_parserStatus;
     QString m_speedState;
     QString m_pinState;

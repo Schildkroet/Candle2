@@ -182,6 +182,7 @@ frmMain::frmMain(QWidget *parent) :
     ui->cmdTop->setParent(ui->glwVisualizer);
     ui->cmdFront->setParent(ui->glwVisualizer);
     ui->cmdLeft->setParent(ui->glwVisualizer);
+    ui->cmdLathe->setParent(ui->glwVisualizer);
 
     // Set up height map
     ui->cmdHeightMapBorderAuto->setMinimumHeight(ui->chkHeightMapBorderShow->sizeHint().height());
@@ -468,7 +469,7 @@ frmMain::~frmMain()
             GrIP_Transmit(MSG_REALTIME_CMD, 0, &p);
         }
 
-        QThread::msleep(100);
+        QThread::msleep(40);
 
         SerialIf_Close();
     }
@@ -939,6 +940,7 @@ void frmMain::placeVisualizerButtons()
     ui->cmdLeft->move(ui->glwVisualizer->width() - ui->cmdLeft->width() - 8, ui->cmdIsometric->geometry().bottom() + 8);
     ui->cmdFront->move(ui->cmdLeft->geometry().left() - ui->cmdFront->width() - 8, ui->cmdIsometric->geometry().bottom() + 8);
     ui->cmdFit->move(ui->glwVisualizer->width() - ui->cmdFit->width() - 8, ui->cmdLeft->geometry().bottom() + 8);
+    ui->cmdLathe->move(ui->cmdFit->geometry().left() - ui->cmdLathe->width() - 8, ui->cmdLeft->geometry().bottom() + 8);
 }
 
 void frmMain::clearTable()
@@ -1756,6 +1758,11 @@ void frmMain::on_cmdLeft_clicked()
 void frmMain::on_cmdIsometric_clicked()
 {
     ui->glwVisualizer->setIsometricView();
+}
+
+void frmMain::on_cmdLathe_clicked()
+{
+    ui->glwVisualizer->setLatheView();
 }
 
 void frmMain::on_actAbout_triggered()

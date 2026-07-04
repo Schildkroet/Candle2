@@ -20,6 +20,8 @@ LineSegment::LineSegment()
     m_isHightlight = false;
     m_vertexIndex = -1;
     m_index = -1;
+    m_plane = PointSegment::XY;
+    m_isClockwise = false;
 }
 
 LineSegment::LineSegment(QVector3D a, QVector3D b, int num) : LineSegment()

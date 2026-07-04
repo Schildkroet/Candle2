@@ -14,6 +14,7 @@ GLWidget::GLWidget(QWidget *parent) : QOpenGLWidget(parent), m_shaderProgram(nul
 {
     m_animateView = false;
     m_updatesEnabled = false;
+    m_latheView = false;
 
     m_xRot = 90;
     m_yRot = 0;
@@ -254,6 +255,7 @@ void GLWidget::setLineWidth(double lineWidth)
 
 void GLWidget::setTopView()
 {
+    m_latheView = false;
     m_xRotTarget = 90;
     m_yRotTarget = m_yRot > 180 ? 360 : 0;
     beginViewAnimation();
@@ -261,6 +263,7 @@ void GLWidget::setTopView()
 
 void GLWidget::setFrontView()
 {
+    m_latheView = false;
     m_xRotTarget = 0;
     m_yRotTarget = m_yRot > 180 ? 360 : 0;
     beginViewAnimation();
@@ -268,8 +271,19 @@ void GLWidget::setFrontView()
 
 void GLWidget::setLeftView()
 {
+    m_latheView = false;
     m_xRotTarget = 0;
     m_yRotTarget = m_yRot > 270 ? 450 : 90;
+    beginViewAnimation();
+}
+
+void GLWidget::setLatheView()
+{
+    // Turning view: looking along Y at the XZ plane with Z horizontal and X vertical,
+    // matching the conventional lathe drawing orientation (spindle axis horizontal, radius vertical).
+    m_latheView = true;
+    m_xRotTarget = 0;
+    m_yRotTarget = 180;
     beginViewAnimation();
 }
 
@@ -280,6 +294,7 @@ int GLWidget::fps()
 
 void GLWidget::setIsometricView()
 {
+    m_latheView = false;
     m_xRotTarget = 45;
     m_yRotTarget = m_yRot > 180 ? 405 : 45;
     beginViewAnimation();
@@ -389,7 +404,13 @@ void GLWidget::updateView()
 
     QVector3D eye(r * cos(angX) * sin(angY) + m_xLookAt, r * sin(angX) + m_yLookAt, r * cos(angX) * cos(angY) + m_zLookAt);
     QVector3D center(m_xLookAt, m_yLookAt, m_zLookAt);
-    QVector3D up(fabs(m_xRot) == 90 ? -sin(angY + (m_xRot < 0 ? M_PI : 0)) : 0, cos(angX), fabs(m_xRot) == 90 ? -cos(angY + (m_xRot < 0 ? M_PI : 0)) : 0);
+    QVector3D up;
+    if (m_latheView) {
+        // Rolled 90 degrees relative to the default Z-up orientation, so model X reads as screen-up.
+        up = QVector3D(1, 0, 0);
+    } else {
+        up = QVector3D(fabs(m_xRot) == 90 ? -sin(angY + (m_xRot < 0 ? M_PI : 0)) : 0, cos(angX), fabs(m_xRot) == 90 ? -cos(angY + (m_xRot < 0 ? M_PI : 0)) : 0);
+    }
 
     m_viewMatrix.lookAt(eye, center, up.normalized());
 
@@ -504,6 +525,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     if ((event->buttons() & Qt::MiddleButton && !(event->modifiers() & Qt::ShiftModifier)) || event->buttons() & Qt::LeftButton) {
 
         stopViewAnimation();
+        m_latheView = false;
 
         m_yRot = normalizeAngle(m_yLastRot - (event->pos().x() - m_lastPos.x()) * 0.5);
         m_xRot = m_xLastRot + (event->pos().y() - m_lastPos.y()) * 0.5;

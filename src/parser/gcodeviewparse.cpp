@@ -11,8 +11,6 @@
 GcodeViewParse::GcodeViewParse(QObject *parent) :
     QObject(parent)
 {
-    absoluteMode = true;
-    absoluteIJK = false;
     currentLine = 0;
     debug = false;
 
